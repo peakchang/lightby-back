@@ -1,8 +1,31 @@
 import nodemailer from 'nodemailer';
+import multer from 'multer';
+import MulterGoogleCloudStorage from "multer-google-storage";
+
 import moment from "moment-timezone";
-
-
 moment.tz.setDefault("Asia/Seoul");
+
+export let imageUpload
+
+// 이미지 업로드 부분!! 파일 1개 / 여러개 공통으로 사용 가능!!
+imageUpload = multer({
+    storage: MulterGoogleCloudStorage.storageEngine({
+        bucket: process.env.GCS_BUCKET_NAME,
+        projectId: process.env.GCS_PROJECT,
+        keyFilename: process.env.GCS_KEY_FILE,
+        acl: 'publicRead',
+        contentType: MulterGoogleCloudStorage.AUTO_CONTENT_TYPE, // ✅ 중요!!
+        // contentType: "image/jpeg",
+        filename: (req, file, cb) => {
+            const now = moment().format('YYMMDD')
+            cb(null, `imgs/imgs${now}/${file.originalname}`);
+        },
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+
+
 
 export const mailSender = {
     // 메일발송 함수
@@ -81,3 +104,43 @@ export const getQueryStr = (data, type, addTimeStr = '') => {
 
     return returnData;
 }
+
+// axios 대용 API 요청 보내기!
+export async function fetchRequest(method, url, data = {}, headers = {}) {
+    const returnObj = { status: true };
+
+    try {
+        const isGet = method.toUpperCase() === 'GET';
+
+        const options = {
+            method: method.toUpperCase(),
+            headers: {
+                'Content-Type': 'application/json',
+                ...headers,
+            },
+        };
+
+        if (!isGet) {
+            options.body = JSON.stringify(data);
+        }
+
+        const res = await fetch(url, options);
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || '서버 오류');
+        }
+
+        const result = await res.json();
+        returnObj.data = result;
+        return returnObj;
+
+    } catch (err) {
+        console.error(`Fetch ${method.toUpperCase()} Error:`, err);
+        returnObj.status = false;
+        returnObj.message = err.message || '서버와의 통신에 실패했습니다.';
+
+        return returnObj;
+    }
+}
+

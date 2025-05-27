@@ -9,8 +9,9 @@ const app = express();
 dotenv.config();
 
 import { apiRouter } from './routes/api.js'
+import { imgRouter } from './routes/img.js';
 
-app.set('port', process.env.PORT || 4002);
+app.set('port', process.env.PORT || 3060);
 app.set('trust proxy', '127.0.0.1');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -38,6 +39,8 @@ app.use(cors(corsOptions));
 
 
 app.use('/api/v9/', apiRouter);
+app.use('/api/v9/img', imgRouter);
+
 
 
 app.get('/chkserver', (req, res) => {
