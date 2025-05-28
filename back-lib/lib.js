@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import multer from 'multer';
 import MulterGoogleCloudStorage from "multer-google-storage";
 
+
 import moment from "moment-timezone";
 moment.tz.setDefault("Asia/Seoul");
 
@@ -17,6 +18,8 @@ imageUpload = multer({
         contentType: MulterGoogleCloudStorage.AUTO_CONTENT_TYPE, // ✅ 중요!!
         // contentType: "image/jpeg",
         filename: (req, file, cb) => {
+            console.log('이미지 업로드는 들어옴?!');
+            
             const now = moment().format('YYMMDD')
             cb(null, `imgs/imgs${now}/${file.originalname}`);
         },
