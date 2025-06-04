@@ -11,6 +11,9 @@ dotenv.config();
 import { apiRouter } from './routes/api.js'
 import { imgRouter } from './routes/img.js';
 
+import { registRouter } from './routes/regist.js';
+import { mainsiteRouter } from './routes/mainsite.js';
+
 app.set('port', process.env.PORT || 3060);
 app.set('trust proxy', '127.0.0.1');
 app.use(express.json());
@@ -40,7 +43,8 @@ app.use(cors(corsOptions));
 
 app.use('/api/v9/', apiRouter);
 app.use('/api/v9/img', imgRouter);
-
+app.use('/api/v9/regist', registRouter);
+app.use('/api/v9/mainsite', mainsiteRouter);
 
 
 app.get('/chkserver', (req, res) => {

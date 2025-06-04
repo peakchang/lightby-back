@@ -10,16 +10,22 @@ import { Storage } from "@google-cloud/storage";
 */
 
 imgRouter.post('/upload_single', imageUpload.single('onimg'), async (req, res, next) => {
+    console.log('들어도 안와?!?!?!');
+    
     let saveUrl
     console.log(req.file);
     console.log('[POST] /upload/image file: ' + JSON.stringify(req.file));
     saveUrl = req.file.filename;
-    res.json({ saveUrl, message: 'gogogogogo' })
+    res.json({ saveUrl })
 })
 
 
 imgRouter.post('/delete', async (req, res, next) => {
+    console.log('이미지 삭제 들어옴?!?!');
+    
     const delPath = req.body.delPath
+    console.log(delPath);
+    
     const storage = new Storage({
         projectId: process.env.GCS_PROJECT,
         keyFilename: process.env.GCS_KEY_FILE,

@@ -15,45 +15,55 @@ export const sql_con = mysql.createConnection({
 
 /*
 
-CREATE DATABASE richby default CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
-CREATE DATABASE ezip default CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+CREATE DATABASE lightby default CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS base(
-    base VARCHAR(10),
-    status_list VARCHAR(255) NOT NULL,
-    color_list VARCHAR(255) NOT NULL
+
+CREATE TABLE IF NOT EXISTS site(
+    idx INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(10) NOT NULL,
+    imgs TEXT NOT NULL,
+    thumbnail VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    point TEXT,
+    addr VARCHAR(100) NOT NULL,
+    res_addr VARCHAR(255) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    agency VARCHAR(50) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    business VARCHAR(255) NOT NULL,
+    occupation VARCHAR(100) NOT NULL,
+    career VARCHAR(100),
+    number_people VARCHAR(50),
+    fee_type VARCHAR(10),
+    fee VARCHAR(50),
+    daily_expense VARCHAR(50),
+    sleep_expense VARCHAR(50),
+    promotion VARCHAR(50),
+    base_pay VARCHAR(50),
+    detail_content TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE site ADD COLUMN thumbnail VARCHAR(255) NOT NULL AFTER imgs;
 
-CREATE TABLE IF NOT EXISTS land(
-    ld_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    ld_name VARCHAR(255),
-    ld_content TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-    ld_location VARCHAR(100) NOT NULL,
-    ld_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+CREATE TABLE IF NOT EXISTS users(
+    idx INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id VARCHAR(50) UNIQUE,
+    sns_id VARCHAR(50) UNIQUE,
+    password VARCHAR(150),
+    phone VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(50),
+    nickname VARCHAR(50) UNIQUE,
+    rate VARCHAR(5) DEFAULT 1,
+    profile_image VARCHAR(255),
+    profile_thumbnail VARCHAR(255),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    connected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    refresh_token TEXT
 );
-
-ALTER TABLE land ADD COLUMN ld_location VARCHAR(100) NOT NULL;
-
-CREATE TABLE IF NOT EXISTS cu_info(
-    cu_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    cu_name VARCHAR(100),
-    cu_phone VARCHAR(100),
-    cu_land INT,
-    cu_status VARCHAR(100),
-    cu_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (cu_land) REFERENCES land(ld_id) ON DELETE SET NULL
-);
-
-ALTER TABLE cu_info ADD COLUMN cu_status VARCHAR(100) AFTER cu_land;
-
-CREATE TABLE IF NOT EXISTS client(
-    cl_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    cl_name VARCHAR(100),
-    cl_phone VARCHAR(100),
-    cl_status VARCHAR(50),
-    cl_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-ALTER TABLE client ADD COLUMN cl_status VARCHAR(50) AFTER cl_phone;
 
 */
