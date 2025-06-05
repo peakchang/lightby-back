@@ -53,5 +53,7 @@ app.get('/chkserver', (req, res) => {
 
 
 app.listen(app.get('port'), () => {
+    console.log('?!?!?!?!?!??!?!?!');
+    
     console.log(`server running in port ${app.get('port')}`);
 })
