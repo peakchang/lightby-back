@@ -14,7 +14,7 @@ import { imgRouter } from './routes/img.js';
 import { registRouter } from './routes/regist.js';
 import { mainsiteRouter } from './routes/mainsite.js';
 
-app.set('port', process.env.PORT || 3060);
+app.set('port', process.env.PORT || 4002);
 app.set('trust proxy', '127.0.0.1');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
