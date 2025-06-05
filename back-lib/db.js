@@ -11,7 +11,7 @@ export const sql_con = mysql.createConnection({
     charset: 'utf8mb4'
 })
 
-// CREATE DATABASE findsales default CHARACTER SET UTF8;
+
 
 /*
 
