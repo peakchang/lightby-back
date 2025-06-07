@@ -12,7 +12,8 @@ import { apiRouter } from './routes/api.js'
 import { imgRouter } from './routes/img.js';
 
 import { registRouter } from './routes/regist.js';
-import { mainsiteRouter } from './routes/mainsite.js';
+import { sitelistRouter } from './routes/sitelist.js';
+import { detailRouter } from './routes/detail.js';
 
 app.set('port', process.env.PORT || 4002);
 app.set('trust proxy', '127.0.0.1');
@@ -44,7 +45,8 @@ app.use(cors(corsOptions));
 app.use('/api/v9/', apiRouter);
 app.use('/api/v9/img', imgRouter);
 app.use('/api/v9/regist', registRouter);
-app.use('/api/v9/mainsite', mainsiteRouter);
+app.use('/api/v9/sitelist', sitelistRouter);
+app.use('/api/v9/detail', detailRouter);
 
 
 app.get('/chkserver', (req, res) => {

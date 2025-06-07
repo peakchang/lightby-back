@@ -20,7 +20,7 @@ const storage = new Storage({
 registRouter.post('/upload', async (req, res, next) => {
     let allData = req.body.allData;
 
-    const THUMB_SIZE = { w: 144, h: 128 };
+    const THUMB_SIZE = { w: 144, h: 112 };
     console.log(allData);
 
     try {
