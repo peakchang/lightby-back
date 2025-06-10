@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS site(
     point TEXT,
     addr VARCHAR(100) NOT NULL,
     res_addr VARCHAR(255) NOT NULL,
+    latitude VARCHAR(100) NOT NULL,
+    longtitude VARCHAR(100) NOT NULL,
     location VARCHAR(255) NOT NULL,
     agency VARCHAR(50) NOT NULL,
     name VARCHAR(50) NOT NULL,
@@ -47,6 +49,8 @@ CREATE TABLE IF NOT EXISTS site(
 );
 
 ALTER TABLE site ADD COLUMN thumbnail VARCHAR(255) NOT NULL AFTER imgs;
+ALTER TABLE site ADD COLUMN longtitude VARCHAR(100) NOT NULL AFTER res_addr;
+ALTER TABLE site ADD COLUMN latitude VARCHAR(100) NOT NULL AFTER res_addr;
 
 
 CREATE TABLE IF NOT EXISTS users(
@@ -64,6 +68,15 @@ CREATE TABLE IF NOT EXISTS users(
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     connected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     refresh_token TEXT
+);
+
+
+CREATE TABLE IF NOT EXISTS favorites (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  item_id INT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, item_id)
 );
 
 */

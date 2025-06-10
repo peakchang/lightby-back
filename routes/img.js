@@ -11,7 +11,7 @@ import { Storage } from "@google-cloud/storage";
 
 imgRouter.post('/upload_single', imageUpload.single('onimg'), async (req, res, next) => {
     console.log('들어도 안와?!?!?!');
-    
+
     let saveUrl
     console.log(req.file);
     console.log('[POST] /upload/image file: ' + JSON.stringify(req.file));
@@ -22,10 +22,9 @@ imgRouter.post('/upload_single', imageUpload.single('onimg'), async (req, res, n
 
 imgRouter.post('/delete', async (req, res, next) => {
     console.log('이미지 삭제 들어옴?!?!');
-    
+
     const delPath = req.body.delPath
     console.log(delPath);
-    
     const storage = new Storage({
         projectId: process.env.GCS_PROJECT,
         keyFilename: process.env.GCS_KEY_FILE,
@@ -40,7 +39,29 @@ imgRouter.post('/delete', async (req, res, next) => {
     }
 
     return res.json({})
-
 })
+
+
+imgRouter.post('/delete_many', async (req, res, next) => {
+    const delImgList = req.body.delImgList
+    console.log(delImgList);
+    
+    for (let i = 0; i < delImgList.length; i++) {
+        const delPath = delImgList[i];
+        const storage = new Storage({
+            projectId: process.env.GCS_PROJECT,
+            keyFilename: process.env.GCS_KEY_FILE,
+        });
+        const bucketName = process.env.GCS_BUCKET_NAME;
+        const bucket = storage.bucket(bucketName);
+        try {
+            await bucket.file(delPath).delete()
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+    return res.json({})
+})
+
 
 export { imgRouter }
