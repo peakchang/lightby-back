@@ -52,6 +52,11 @@ ALTER TABLE site ADD COLUMN thumbnail VARCHAR(255) NOT NULL AFTER imgs;
 ALTER TABLE site ADD COLUMN longtitude VARCHAR(100) NOT NULL AFTER res_addr;
 ALTER TABLE site ADD COLUMN latitude VARCHAR(100) NOT NULL AFTER res_addr;
 
+// 0612 상품명 / 아이콘리스트 / 합계금액 (결제금액) / 
+ALTER TABLE site ADD COLUMN sum INT AFTER detail_content;
+ALTER TABLE site ADD COLUMN icons VARCHAR(100) AFTER detail_content;
+ALTER TABLE site ADD COLUMN product VARCHAR(100) NOT NULL AFTER detail_content;
+
 
 CREATE TABLE IF NOT EXISTS users(
     idx INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
