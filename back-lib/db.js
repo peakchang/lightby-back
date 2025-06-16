@@ -44,6 +44,9 @@ CREATE TABLE IF NOT EXISTS site(
     promotion VARCHAR(50),
     base_pay VARCHAR(50),
     detail_content TEXT,
+    product VARCHAR(100) NOT NULL,
+    icons VARCHAR(100),
+    sum INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -57,6 +60,8 @@ ALTER TABLE site ADD COLUMN sum INT AFTER detail_content;
 ALTER TABLE site ADD COLUMN icons VARCHAR(100) AFTER detail_content;
 ALTER TABLE site ADD COLUMN product VARCHAR(100) NOT NULL AFTER detail_content;
 
+ALTER TABLE site ADD COLUMN payment_key VARCHAR(255) UNIQUE AFTER sum;
+
 
 CREATE TABLE IF NOT EXISTS users(
     idx INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -69,12 +74,14 @@ CREATE TABLE IF NOT EXISTS users(
     rate VARCHAR(5) DEFAULT 1,
     profile_image VARCHAR(255),
     profile_thumbnail VARCHAR(255),
+    customer_key VARCHAR(100) UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     connected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     refresh_token TEXT
 );
 
+ALTER TABLE users ADD COLUMN customer_key VARCHAR(100) UNIQUE AFTER profile_thumbnail;
 
 CREATE TABLE IF NOT EXISTS favorites (
   id INT AUTO_INCREMENT PRIMARY KEY,
