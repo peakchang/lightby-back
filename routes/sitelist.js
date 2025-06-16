@@ -18,7 +18,7 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
     let top_list = [];
     let site_list = [];
 
-    const rows = "idx, thumbnail,imgs,subject,point,fee_type,fee,business,occupation"
+    const rows = "idx, thumbnail,imgs,subject,point,fee_type,fee,business,occupation,icons"
     try {
         const getPremiumListQuery = `SELECT ${rows} FROM site WHERE product = ? ORDER BY idx DESC`
         const [getPremiumList] = await sql_con.promise().query(getPremiumListQuery, ['premium']);
