@@ -15,6 +15,8 @@ import { registRouter } from './routes/regist.js';
 import { sitelistRouter } from './routes/sitelist.js';
 import { detailRouter } from './routes/detail.js';
 
+import { boardRouter } from './routes/board.js';
+
 app.set('port', process.env.PORT || 4002);
 app.set('trust proxy', '127.0.0.1');
 app.use(express.json());
@@ -47,6 +49,9 @@ app.use('/api/v9/img', imgRouter);
 app.use('/api/v9/regist', registRouter);
 app.use('/api/v9/sitelist', sitelistRouter);
 app.use('/api/v9/detail', detailRouter);
+
+app.use('/api/v9/board', boardRouter);
+
 
 
 app.get('/chkserver', (req, res) => {

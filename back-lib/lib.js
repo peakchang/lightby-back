@@ -19,9 +19,14 @@ imageUpload = multer({
         // contentType: "image/jpeg",
         filename: (req, file, cb) => {
             console.log('이미지 업로드는 들어옴?!');
+
+            console.log(file);
+            console.log(req.body);
+            console.log(`folder : ${req.body.folder}`);
+            const folder = req.body.folder
             
             const now = moment().format('YYMMDD')
-            cb(null, `imgs/imgs${now}/${file.originalname}`);
+            cb(null, `${folder}/imgs${now}/${file.originalname}`);
         },
     }),
     limits: { fileSize: 5 * 1024 * 1024 },

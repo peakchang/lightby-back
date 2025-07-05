@@ -76,4 +76,14 @@ registRouter.post('/upload', async (req, res, next) => {
 
 })
 
+
+
+
+
+
+
+registRouter.post('/board_upload', async (req, res, next) => {
+
+})
+
 export { registRouter }
