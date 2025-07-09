@@ -17,9 +17,54 @@ const storage = new Storage({
 });
 
 
+registRouter.post('/load_prev_post', async (req, res, next) => {
+    const { postIdx } = req.body
+    let prevPost = {}
+    try {
+        const loadPrevPostQuery = "SELECT * FROM site WHERE idx = ?";
+        const [loadPrevPost] = await sql_con.promise().query(loadPrevPostQuery, [postIdx]);
+        prevPost = loadPrevPost[0]
+        console.log(prevPost);
+        
+    } catch (error) {
+
+    }
+    res.json({ prevPost })
+})
+registRouter.post('/load_prev_list', async (req, res, next) => {
+    let prevPostList = []
+    let startNum = 0
+    const { user_idx } = req.body;
+    try {
+        const loadPrevPostListQuery = `SELECT idx, subject, created_at FROM site WHERE user_id = ? ORDER BY idx DESC LIMIT ${startNum}, 10;`
+        const [loadPrevPostList] = await sql_con.promise().query(loadPrevPostListQuery, [user_idx]);
+        prevPostList = loadPrevPostList
+    } catch (error) {
+
+    }
+    res.json({ prevPostList })
+})
+
+registRouter.post('/get_post_count', async (req, res, next) => {
+
+    const { userId } = req.body;
+    console.log(userId);
+    let postNum = 0
+    try {
+        const getPostNumQuery = "SELECT COUNT(*) as c FROM site WHERE user_id = ?;"
+        const getPostNum = await sql_con.promise().query(getPostNumQuery, [userId]);
+        postNum = getPostNum[0][0].c
+    } catch (error) {
+
+    }
+
+    res.json({ postNum })
+})
+
 registRouter.post('/upload', async (req, res, next) => {
 
-    console.log('업로드 진입이요!!!!');
+    console.log('구인구직 업로드 진입이요~~~~~~~~~!!!!');
+
 
     let allData = req.body.allData;
 

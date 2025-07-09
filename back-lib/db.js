@@ -76,11 +76,14 @@ CREATE TABLE IF NOT EXISTS users(
     profile_image VARCHAR(255),
     profile_thumbnail VARCHAR(255),
     customer_key VARCHAR(100) UNIQUE,
+    interest TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     connected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     refresh_token TEXT
 );
+
+ALTER TABLE users ADD COLUMN interest TEXT AFTER customer_key;
 
 ALTER TABLE users ADD COLUMN customer_key VARCHAR(100) UNIQUE AFTER profile_thumbnail;
 

@@ -11,6 +11,8 @@ dotenv.config();
 import { apiRouter } from './routes/api.js'
 import { imgRouter } from './routes/img.js';
 
+import { usersRouter } from './routes/users.js';
+
 import { registRouter } from './routes/regist.js';
 import { sitelistRouter } from './routes/sitelist.js';
 import { detailRouter } from './routes/detail.js';
@@ -49,6 +51,8 @@ app.use('/api/v9/img', imgRouter);
 app.use('/api/v9/regist', registRouter);
 app.use('/api/v9/sitelist', sitelistRouter);
 app.use('/api/v9/detail', detailRouter);
+app.use('/api/v9/users', usersRouter);
+
 
 app.use('/api/v9/board', boardRouter);
 
