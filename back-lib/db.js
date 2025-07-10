@@ -4,11 +4,11 @@ dotenv.config();
 
 
 export const sql_con = mysql.createConnection({
-    host: process.env.HOST || '127.0.0.1',
-    user: 'root',
-    password: process.env.DBPWD,
-    database: process.env.SHEMA,
-    charset: 'utf8mb4'
+  host: process.env.HOST || '127.0.0.1',
+  user: 'root',
+  password: process.env.DBPWD,
+  database: process.env.SHEMA,
+  charset: 'utf8mb4'
 })
 
 
@@ -113,6 +113,17 @@ CREATE TABLE IF NOT EXISTS reply (
   bo_id INT NOT NULL,
   content TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+CREATE TABLE post_likes (
+    idx INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    post_id INT NOT NULL,
+    is_liked BOOL DEFAULT TRUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_like (user_id, post_id)
 );
 
 */

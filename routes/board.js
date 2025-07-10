@@ -1,15 +1,49 @@
 import express from "express";
-import { Storage } from "@google-cloud/storage";
-import sharp from 'sharp';
 import { sql_con } from "../back-lib/db.js";
-import { getQueryStr } from "../back-lib/lib.js";
-import axios from 'axios'
-import qs from 'qs'
-
-import moment from 'moment-timezone';
+import moment from "moment-timezone";
 
 
 const boardRouter = express.Router();
+
+boardRouter.post('/like_action', async (req, res, next) => {
+
+    const { user_id, post_id } = req.body;
+
+    console.log(user_id, post_id);
+
+    const now = moment().format('YYYY-MM-DD HH:mm:ss')
+
+    try {
+        const chkLikeQuery = "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ?";
+        const [chkLike] = await sql_con.promise().query(chkLikeQuery, [user_id, post_id]);
+
+        console.log(chkLike);
+
+        if (chkLike.length > 0 && chkLike[0]['is_liked'] == true) {
+            console.log('첫번째 여기!');
+
+            const updateLikeDelQuery = "UPDATE post_likes SET is_liked = FALSE WHERE user_id = ? AND post_id = ?"
+            await sql_con.promise().query(updateLikeDelQuery, [user_id, post_id]);
+
+        } else if (chkLike.length > 0 && chkLike[0]['is_liked'] == false) {
+            console.log('두번째 여기!');
+
+            const updateLikeDelQuery = "UPDATE post_likes SET is_liked = TRUE WHERE user_id = ? AND post_id = ?"
+            await sql_con.promise().query(updateLikeDelQuery, [user_id, post_id]);
+
+        } else {
+            const insertListQuery = "INSERT INTO post_likes (user_id, post_id, created_at) VALUES (?,?,?)";
+            await sql_con.promise().query(insertListQuery, [user_id, post_id, now]);
+        }
+
+    } catch (error) {
+        console.error(error.message);
+
+        console.log('에런데?');
+
+    }
+    res.json({})
+})
 
 boardRouter.post('/upload_reply', async (req, res, next) => {
     console.log('댓글 등록 진입!');
