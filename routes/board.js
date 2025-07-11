@@ -5,35 +5,51 @@ import moment from "moment-timezone";
 
 const boardRouter = express.Router();
 
+boardRouter.post('/chk_like', async (req, res, next) => {
+
+    const { user_id, post_id } = req.body;
+    let likeStatus = false;
+    try {
+        const chkLikeQuery = "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ?";
+        const [chkLike] = await sql_con.promise().query(chkLikeQuery, [user_id, post_id]);
+        if (chkLike.length == 0) {
+            likeStatus = false;
+        } else {
+            if (chkLike[0]['is_liked']) {
+                likeStatus = true;
+            }
+        }
+    } catch (error) {
+
+    }
+    res.json({ likeStatus })
+})
+
 boardRouter.post('/like_action', async (req, res, next) => {
 
     const { user_id, post_id } = req.body;
-
-    console.log(user_id, post_id);
-
     const now = moment().format('YYYY-MM-DD HH:mm:ss')
+    let likeStatus = false;
 
     try {
         const chkLikeQuery = "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ?";
         const [chkLike] = await sql_con.promise().query(chkLikeQuery, [user_id, post_id]);
 
-        console.log(chkLike);
-
         if (chkLike.length > 0 && chkLike[0]['is_liked'] == true) {
-            console.log('첫번째 여기!');
-
             const updateLikeDelQuery = "UPDATE post_likes SET is_liked = FALSE WHERE user_id = ? AND post_id = ?"
             await sql_con.promise().query(updateLikeDelQuery, [user_id, post_id]);
 
+            likeStatus = false;
         } else if (chkLike.length > 0 && chkLike[0]['is_liked'] == false) {
-            console.log('두번째 여기!');
-
             const updateLikeDelQuery = "UPDATE post_likes SET is_liked = TRUE WHERE user_id = ? AND post_id = ?"
             await sql_con.promise().query(updateLikeDelQuery, [user_id, post_id]);
 
+            likeStatus = true;
         } else {
             const insertListQuery = "INSERT INTO post_likes (user_id, post_id, created_at) VALUES (?,?,?)";
             await sql_con.promise().query(insertListQuery, [user_id, post_id, now]);
+
+            likeStatus = true;
         }
 
     } catch (error) {
@@ -42,7 +58,7 @@ boardRouter.post('/like_action', async (req, res, next) => {
         console.log('에런데?');
 
     }
-    res.json({})
+    res.json({ likeStatus })
 })
 
 boardRouter.post('/upload_reply', async (req, res, next) => {
@@ -68,21 +84,41 @@ boardRouter.post('/upload_reply', async (req, res, next) => {
 boardRouter.post('/load_item', async (req, res, next) => {
     console.log('여기 들어오자규!!');
 
-    let boardItem = {};
+    let postItem = {};
     let replyList = [];
-    let { boardIdx } = req.body
+    let likeCount = 0
+    let { postIdx } = req.body
+    console.log(postIdx);
+
     try {
-        const getBoardItemQuery = `SELECT bf.*, u.nickname, u.profile_thumbnail
+        // 기본 post 내용 불러오기 (user 정보랑 JOIN 해서 불러오기)
+        const getpostItemQuery = `SELECT bf.*, u.nickname, u.profile_thumbnail
         FROM
         board_fee bf
         LEFT JOIN
         users u ON bf.user_id = u.idx
         WHERE
         bf.idx = ?`
-        const [getBoardItem] = await sql_con.promise().query(getBoardItemQuery, [boardIdx.id]);
-        boardItem = getBoardItem[0]
+        const [getpostItem] = await sql_con.promise().query(getpostItemQuery, [postIdx.id]);
+        postItem = getpostItem[0]
 
-        console.log(boardItem);
+        console.log(postItem);
+
+        const getLikeCountQuery = "SELECT COUNT(*) as likeCount FROM post_likes WHERE post_id = ? AND is_liked = TRUE";
+
+        console.log(postItem['user_id']);
+        console.log(postIdx.id);
+        
+        
+        
+        const [getLikeCount] = await sql_con.promise().query(getLikeCountQuery, [postIdx.id]);
+
+        console.log(getLikeCount);
+
+        likeCount = getLikeCount[0]['likeCount']
+
+        console.log(likeCount);
+        
 
 
 
@@ -90,14 +126,16 @@ boardRouter.post('/load_item', async (req, res, next) => {
         FROM reply r
         LEFT JOIN
         users u ON r.user_id = u.idx
-        WHERE bo_id = ?`;
-        const [getReplyList] = await sql_con.promise().query(getReplyListQuery, [boardItem.idx]);
+        WHERE bo_id = ?
+        ORDER BY idx DESC
+        `;
+        const [getReplyList] = await sql_con.promise().query(getReplyListQuery, [postItem.idx]);
         replyList = getReplyList
 
     } catch (error) {
-
+        console.error(error.message);
     }
-    return res.json({ boardItem, replyList })
+    return res.json({ postItem, replyList, likeCount })
 })
 
 

@@ -3,13 +3,21 @@ import dotenv from "dotenv"
 dotenv.config();
 
 
+// export const sql_con = mysql.createConnection({
+//   host: process.env.HOST || '127.0.0.1',
+//   user: 'root',
+//   password: process.env.DBPWD,
+//   database: process.env.SHEMA,
+//   charset: 'utf8mb4'
+// })
+
 export const sql_con = mysql.createConnection({
-  host: process.env.HOST || '127.0.0.1',
+  host: 'localhost',
   user: 'root',
-  password: process.env.DBPWD,
-  database: process.env.SHEMA,
+  password: 'rkwkrh13@!', // 꼭 입력
+  database: 'lightby',
   charset: 'utf8mb4'
-})
+});
 
 
 
@@ -101,10 +109,11 @@ CREATE TABLE IF NOT EXISTS board_fee (
   imgs TEXT,
   subject VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,
-  good_count INT,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE board_fee DROP COLUMN good_count;
 
 
 CREATE TABLE IF NOT EXISTS reply (
