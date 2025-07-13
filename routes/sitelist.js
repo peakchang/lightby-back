@@ -75,17 +75,7 @@ function buildLikeClause(field, keywords) {
 // 메인 페이지 사이트 리스트!!!
 sitelistRouter.post('/load_site_list', async (req, res, next) => {
 
-    console.log('여기는 안들어오는거얌?');
-
-    console.log('chk');
-
     const { mainLocation, searchVal } = req.body
-    console.log(mainLocation);
-
-    console.log(searchVal);
-
-
-
 
 
     let locationQueryStr = ""

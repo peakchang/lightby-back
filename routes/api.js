@@ -7,8 +7,6 @@ const apiRouter = express.Router();
 
 apiRouter.post('/update_interest', async (req, res, next) => {
     const { idx, jsonStr } = req.body
-    console.log(idx);
-    console.log(jsonStr);
     try {
         const updateInterestQuery = "UPDATE users SET interest = ? WHERE idx = ?";
         await sql_con.promise().query(updateInterestQuery, [jsonStr, idx]);
@@ -23,7 +21,6 @@ apiRouter.post('/update_interest', async (req, res, next) => {
 // my 페이지 회원 정보 수정 부분
 apiRouter.post('/update_user_info', async (req, res, next) => {
 
-    console.log(req.body);
     const { idx, nickname, phone, type } = req.body;
     if (type == 'nickname') {
         try {
@@ -57,7 +54,6 @@ apiRouter.post('/update_password', async (req, res, next) => {
 
         const saltRounds = 10; // 솔트 라운드 수 (높을수록 보안은 좋지만 속도가 느려짐)
         const newPassword = await bcrypt.hash(password, saltRounds);
-        console.log(newPassword);
 
         const updatePasswordQuery = "UPDATE users SET password = ? WHERE idx = ?";
         await sql_con.promise().query(updatePasswordQuery, [newPassword, idx]);
@@ -74,10 +70,6 @@ apiRouter.post('/update_password', async (req, res, next) => {
 apiRouter.post('/update_profile', async (req, res, next) => {
     const { type, idx, profile } = req.body;
 
-    console.log(type);
-    console.log(idx);
-    console.log(profile);
-
     if (type == 'delete') {
         const storage = new Storage({
             projectId: process.env.GCS_PROJECT,
@@ -93,8 +85,6 @@ apiRouter.post('/update_profile', async (req, res, next) => {
 
             return res.json({ profile: getUserInfo[0]['profile_image'] })
         } catch (error) {
-            console.log('slfajsdf');
-
             console.error(error.message);
             // return res.status(400).json({})
         }
@@ -133,14 +123,11 @@ apiRouter.post('/update_profile', async (req, res, next) => {
 
 // my페이지 진입시 user_info 불러오는 부분
 apiRouter.post('/load_user_info', async (req, res, next) => {
-    console.log('진입췍');
     const { userIdx } = req.body;
     let userInfo = {};
     try {
         const loadUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
         const [loadUserInfo] = await sql_con.promise().query(loadUserInfoQuery, [userIdx]);
-        console.log(loadUserInfo);
-
         userInfo = loadUserInfo[0]
     } catch (error) {
 
@@ -149,10 +136,7 @@ apiRouter.post('/load_user_info', async (req, res, next) => {
 })
 
 apiRouter.post('/payment_customerkey_chk', async (req, res, next) => {
-
-    console.log('들어왔오!!!');
     const { userId } = req.body;
-    console.log(userId);
 
     let customer_key = ""
     let user_name = ""
@@ -166,7 +150,6 @@ apiRouter.post('/payment_customerkey_chk', async (req, res, next) => {
 
         } else {
             customer_key = `usr_${userId}_${Date.now().toString(36)}`;
-            console.log(customer_key);
             const updateUserCustomerKeyQuery = "UPDATE users SET customer_key = ? WHERE idx = ?";
             await sql_con.promise().query(updateUserCustomerKeyQuery, [customer_key, userId]);
         }

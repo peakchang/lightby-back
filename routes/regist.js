@@ -24,7 +24,6 @@ registRouter.post('/load_prev_post', async (req, res, next) => {
         const loadPrevPostQuery = "SELECT * FROM site WHERE idx = ?";
         const [loadPrevPost] = await sql_con.promise().query(loadPrevPostQuery, [postIdx]);
         prevPost = loadPrevPost[0]
-        console.log(prevPost);
         
     } catch (error) {
 
@@ -48,7 +47,6 @@ registRouter.post('/load_prev_list', async (req, res, next) => {
 registRouter.post('/get_post_count', async (req, res, next) => {
 
     const { userId } = req.body;
-    console.log(userId);
     let postNum = 0
     try {
         const getPostNumQuery = "SELECT COUNT(*) as c FROM site WHERE user_id = ?;"
@@ -63,13 +61,9 @@ registRouter.post('/get_post_count', async (req, res, next) => {
 
 registRouter.post('/upload', async (req, res, next) => {
 
-    console.log('구인구직 업로드 진입이요~~~~~~~~~!!!!');
-
-
     let allData = req.body.allData;
-
     const THUMB_SIZE = { w: 144, h: 112 };
-    console.log(allData);
+
 
     try {
         // 썸네일 만들어서 저장!
@@ -88,8 +82,6 @@ registRouter.post('/upload', async (req, res, next) => {
         const originFile = gcsPath.split('/').pop();
         const today = moment().tz('Asia/Seoul').format('YYMMDD');
         const thumbName = `imgs/imgs${today}/thumb-${originFile}`;
-        console.log(thumbName);
-
         const thumbFile = bucket.file(thumbName);
 
         // 업로드 하기!!!
@@ -108,9 +100,7 @@ registRouter.post('/upload', async (req, res, next) => {
     }
     try {
         const queryStr = getQueryStr(allData, 'insert', 'created_at')
-        // console.log(queryStr);
         const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
-        console.log(siteInsertQuery);
         await sql_con.promise().query(siteInsertQuery, queryStr.values);
     } catch (err) {
         console.error(err.message);

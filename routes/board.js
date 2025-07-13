@@ -55,18 +55,12 @@ boardRouter.post('/like_action', async (req, res, next) => {
     } catch (error) {
         console.error(error.message);
 
-        console.log('에런데?');
-
     }
     res.json({ likeStatus })
 })
 
 boardRouter.post('/upload_reply', async (req, res, next) => {
-    console.log('댓글 등록 진입!');
     const { bo_id, user_id, replyContent } = req.body
-    console.log(bo_id);
-    console.log(user_id);
-    console.log(replyContent);
     const now = moment().format('YYYY-MM-DD HH:mm:ss')
 
     try {
@@ -82,13 +76,11 @@ boardRouter.post('/upload_reply', async (req, res, next) => {
 })
 
 boardRouter.post('/load_item', async (req, res, next) => {
-    console.log('여기 들어오자규!!');
-
     let postItem = {};
     let replyList = [];
     let likeCount = 0
     let { postIdx } = req.body
-    console.log(postIdx);
+
 
     try {
         // 기본 post 내용 불러오기 (user 정보랑 JOIN 해서 불러오기)
@@ -102,24 +94,9 @@ boardRouter.post('/load_item', async (req, res, next) => {
         const [getpostItem] = await sql_con.promise().query(getpostItemQuery, [postIdx.id]);
         postItem = getpostItem[0]
 
-        console.log(postItem);
-
         const getLikeCountQuery = "SELECT COUNT(*) as likeCount FROM post_likes WHERE post_id = ? AND is_liked = TRUE";
-
-        console.log(postItem['user_id']);
-        console.log(postIdx.id);
-        
-        
-        
         const [getLikeCount] = await sql_con.promise().query(getLikeCountQuery, [postIdx.id]);
-
-        console.log(getLikeCount);
-
         likeCount = getLikeCount[0]['likeCount']
-
-        console.log(likeCount);
-        
-
 
 
         const getReplyListQuery = `SELECT r.*, u.nickname, u.profile_thumbnail 
@@ -132,6 +109,9 @@ boardRouter.post('/load_item', async (req, res, next) => {
         const [getReplyList] = await sql_con.promise().query(getReplyListQuery, [postItem.idx]);
         replyList = getReplyList
 
+        console.log(replyList);
+        
+
     } catch (error) {
         console.error(error.message);
     }
@@ -142,7 +122,6 @@ boardRouter.post('/load_item', async (req, res, next) => {
 boardRouter.post('/load_list', async (req, res, next) => {
 
     let { startNum } = req.body
-    console.log(startNum);
 
     let board_list = [];
     try {
@@ -163,10 +142,7 @@ boardRouter.post('/load_list', async (req, res, next) => {
             bf.idx DESC 
             LIMIT ${startNum}, 10`
         const [loadBoard] = await sql_con.promise().query(loadBoardList);
-        console.log(loadBoard);
         board_list = loadBoard
-
-        console.log('여기 아니야?!?!?!');
 
     } catch (error) {
 
@@ -178,11 +154,6 @@ boardRouter.post('/load_list', async (req, res, next) => {
 boardRouter.post('/upload', async (req, res, next) => {
     const { user_id, subject, content, imgs } = req.body
     const now = moment().format('YYYY-MM-DD HH:mm:ss')
-    console.log(now);
-
-    console.log(subject);
-    console.log(content);
-    console.log(imgs);
 
     try {
         const boardUploadQuery = "INSERT INTO board_fee (user_id, imgs, subject, content, created_at) VALUES (?,?,?,?,?)"

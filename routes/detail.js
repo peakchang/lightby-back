@@ -9,8 +9,6 @@ const detailRouter = express.Router();
 detailRouter.post('/', async (req, res, next) => {
 
     const { idx, userId } = req.body;
-    // console.log(idx);
-    // console.log(userId);
 
 
     let detail = {}
@@ -23,9 +21,6 @@ detailRouter.post('/', async (req, res, next) => {
 
         const favBoolChkQuery = "SELECT * FROM favorites WHERE user_id = ? AND item_id = ?";
         const [favBoolChk] = await sql_con.promise().query(favBoolChkQuery, [userId, idx]);
-
-        console.log(favBoolChk);
-        console.log(`favBoolChk 길이는? : ${favBoolChk.length}`);
         
         
         if (favBoolChk.length > 0) {
@@ -42,7 +37,6 @@ detailRouter.post('/', async (req, res, next) => {
 
 detailRouter.post('/favorate', async (req, res, next) => {
     const body = req.body;
-    console.log(body);
     const now = moment().tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
 
 
