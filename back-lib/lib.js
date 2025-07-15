@@ -19,7 +19,6 @@ imageUpload = multer({
         // contentType: "image/jpeg",
         filename: (req, file, cb) => {
             console.log('이미지 업로드는 들어옴?!');
-
             console.log(file);
             console.log(req.body);
             console.log(`folder : ${req.body.folder}`);

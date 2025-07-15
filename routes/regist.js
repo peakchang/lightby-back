@@ -109,29 +109,31 @@ registRouter.post('/upload', async (req, res, next) => {
     try {
         // 썸네일 만들어서 저장!
         const gcsPath = allData.imgs.split(',')[0]
+        let thumbName = ""
+        if (gcsPath.split('.')[1] != 'gif') {
+            const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
+            const file = bucket.file(gcsPath);
+            const [buffer] = await file.download();
 
-        const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
-        const file = bucket.file(gcsPath);
-        const [buffer] = await file.download();
+            // // 2) 썸네일 생성 (가운데 잘라서 180x180)
+            const thumbBuffer = await sharp(buffer)
+                .resize(THUMB_SIZE.w, THUMB_SIZE.h, { fit: 'cover', position: 'centre' })
+                .toFormat('jpeg', { quality: 80 })
+                .toBuffer();
 
-        // // 2) 썸네일 생성 (가운데 잘라서 180x180)
-        const thumbBuffer = await sharp(buffer)
-            .resize(THUMB_SIZE.w, THUMB_SIZE.h, { fit: 'cover', position: 'centre' })
-            .toFormat('jpeg', { quality: 80 })
-            .toBuffer();
+            const originFile = gcsPath.split('/').pop();
+            const today = moment().tz('Asia/Seoul').format('YYMMDD');
+            thumbName = `imgs/imgs${today}/thumb-${originFile}`;
+            const thumbFile = bucket.file(thumbName);
 
-        const originFile = gcsPath.split('/').pop();
-        const today = moment().tz('Asia/Seoul').format('YYMMDD');
-        const thumbName = `imgs/imgs${today}/thumb-${originFile}`;
-        const thumbFile = bucket.file(thumbName);
-
-        // 업로드 하기!!!
-        await thumbFile.save(thumbBuffer, {
-            contentType: 'image/jpeg',
-            resumable: false,
-            predefinedAcl: 'publicRead',          // ← 핵심
-            metadata: { cacheControl: 'public,max-age=31536000' }
-        });
+            // 업로드 하기!!!
+            await thumbFile.save(thumbBuffer, {
+                contentType: 'image/jpeg',
+                resumable: false,
+                predefinedAcl: 'publicRead',          // ← 핵심
+                metadata: { cacheControl: 'public,max-age=31536000' }
+            });
+        }
 
         allData['thumbnail'] = thumbName
 

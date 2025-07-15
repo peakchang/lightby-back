@@ -10,8 +10,6 @@ import { Storage } from "@google-cloud/storage";
 */
 
 imgRouter.post('/upload_single', imageUpload.single('onimg'), async (req, res, next) => {
-
-
     let saveUrl
     saveUrl = req.file.filename;
     res.json({ saveUrl })
