@@ -18,6 +18,7 @@ import { sitelistRouter } from './routes/sitelist.js';
 import { detailRouter } from './routes/detail.js';
 
 import { boardRouter } from './routes/board.js';
+import { qnaRouter } from './routes/qna.js';
 
 app.set('port', process.env.PORT || 4002);
 app.set('trust proxy', '127.0.0.1');
@@ -52,6 +53,7 @@ app.use('/api/v9/regist', registRouter);
 app.use('/api/v9/sitelist', sitelistRouter);
 app.use('/api/v9/detail', detailRouter);
 app.use('/api/v9/users', usersRouter);
+app.use('/api/v9/qna', qnaRouter);
 
 
 app.use('/api/v9/board', boardRouter);

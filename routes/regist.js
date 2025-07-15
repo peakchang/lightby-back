@@ -17,6 +17,47 @@ const storage = new Storage({
 });
 
 
+registRouter.post('/update', async (req, res, next) => {
+
+    const { allData } = req.body;
+    console.log(allData);
+
+    const itemIdx = allData.idx;
+    ['idx', 'sum', 'product', 'created_at', 'updated_at'].forEach(key => delete allData[key]);
+
+    const queryStr = getQueryStr(allData, 'update', 'updated_at')
+    console.log(queryStr);
+
+    queryStr.values.push(itemIdx)
+
+    try {
+        const updateQuery = `UPDATE site SET ${queryStr.str} WHERE idx = ?`
+        await sql_con.promise().query(updateQuery, queryStr.values);
+    } catch (error) {
+
+    }
+
+
+
+
+    res.json({})
+})
+
+registRouter.post('/load_modify_content', async (req, res, next) => {
+    const { userId, modifyIdx } = req.body;
+    let modifyContent = {}
+    try {
+        const loadModifyContentQuery = "SELECT * FROM site WHERE user_id = ? AND idx = ?";
+        const [loadModifyContent] = await sql_con.promise().query(loadModifyContentQuery, [userId, modifyIdx]);
+        modifyContent = loadModifyContent[0]
+        console.log(modifyContent);
+
+    } catch (error) {
+
+    }
+    res.json({ modifyContent })
+})
+
 registRouter.post('/load_prev_post', async (req, res, next) => {
     const { postIdx } = req.body
     let prevPost = {}
@@ -24,7 +65,7 @@ registRouter.post('/load_prev_post', async (req, res, next) => {
         const loadPrevPostQuery = "SELECT * FROM site WHERE idx = ?";
         const [loadPrevPost] = await sql_con.promise().query(loadPrevPostQuery, [postIdx]);
         prevPost = loadPrevPost[0]
-        
+
     } catch (error) {
 
     }

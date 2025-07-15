@@ -54,6 +54,24 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
 
         } else if (type == 'zzim') {
 
+            const getZzimListQuery = `SELECT site.*
+            FROM post_likes
+            JOIN site ON post_likes.post_id = site.idx
+            WHERE post_likes.user_id = ?
+            AND post_likes.is_liked = 1
+            ORDER BY site.idx DESC;`
+
+            console.log(userId);
+
+            const [getZzimList] = await sql_con.promise().query(getZzimListQuery, [userId]);
+            if (getZzimList.length == 0) {
+                interestStatus = false;
+                statusMessage = '찜 한 공고가 없습니다.'
+                return res.json({ postList, interestStatus, statusMessage })
+            }
+
+            interestStatus = true;
+            postList = getZzimList
         }
 
     } catch (error) {

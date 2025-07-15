@@ -129,4 +129,15 @@ CREATE TABLE post_likes (
     UNIQUE KEY unique_like (user_id, post_id)
 );
 
+// QNA 테이블, 질문자가 관리자 (등급 5 이상)면 FAQ로, 아니면 개별 QnA로!!
+CREATE TABLE qna (
+    idx INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    user_rate INT,
+    question TEXT,
+    question_created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    answer TEXT,
+    answer_created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 */

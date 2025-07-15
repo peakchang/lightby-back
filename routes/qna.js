@@ -1,0 +1,46 @@
+import express from "express";
+import { sql_con } from "../back-lib/db.js";
+import bcrypt from 'bcrypt';
+import { Storage } from "@google-cloud/storage";
+import moment from "moment-timezone";
+
+const qnaRouter = express.Router();
+
+qnaRouter.post('/load_qna_list', async (req, res, next) => {
+
+    const { userIdx } = req.body;
+    console.log(userIdx);
+
+    let faqList = [];
+    let qnaList = [];
+
+    try {
+
+        const getFaqListQuery = "SELECT * FROM qna WHERE user_rate >= 3 ORDER BY idx DESC";
+        const [getFaqList] = await sql_con.promise().query(getFaqListQuery);
+        faqList = getFaqList
+
+
+        const getQnaListQuery = "SELECT * FROM qna WHERE user_rate is NULL AND user_id = ? ORDER BY idx DESC";
+        const [getQnaList] = await sql_con.promise().query(getQnaListQuery, [userIdx]);
+        qnaList = getQnaList
+
+    } catch (error) {
+
+    }
+    res.json({ faqList, qnaList })
+})
+
+qnaRouter.post('/upload', async (req, res, next) => {
+    const { userId, questionVal } = req.body
+    const now = moment().format('YYYY-MM-DD HH:mm:ss')
+    try {
+        const uploadQuestionQuery = "INSERT INTO qna (user_id, question, question_created_at) VALUES (?,?,?)";
+        await sql_con.promise().query(uploadQuestionQuery, [userId, questionVal, now]);
+    } catch (error) {
+
+    }
+    res.json({})
+})
+
+export { qnaRouter }

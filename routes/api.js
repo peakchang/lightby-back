@@ -11,9 +11,9 @@ apiRouter.post('/update_interest', async (req, res, next) => {
         const updateInterestQuery = "UPDATE users SET interest = ? WHERE idx = ?";
         await sql_con.promise().query(updateInterestQuery, [jsonStr, idx]);
     } catch (error) {
-        
+
     }
-    
+
     res.json({})
 })
 
@@ -121,18 +121,35 @@ apiRouter.post('/update_profile', async (req, res, next) => {
 
 })
 
-// my페이지 진입시 user_info 불러오는 부분
+// my페이지 진입시 user_info 불러오는 부분 / 본인 글 갯수도 같이 부르기!
 apiRouter.post('/load_user_info', async (req, res, next) => {
     const { userIdx } = req.body;
     let userInfo = {};
+    let postCount = 0;
     try {
         const loadUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
         const [loadUserInfo] = await sql_con.promise().query(loadUserInfoQuery, [userIdx]);
         userInfo = loadUserInfo[0]
+
+
+        console.log(userInfo);
+
+        const getSiteCountQuery = "SELECT COUNT(*) AS sitecount FROM site WHERE user_id = ?";
+        const [getSiteCount] = await sql_con.promise().query(getSiteCountQuery, [userInfo.idx]);
+        console.log(getSiteCount);
+
+        const getBoardFeeCountQuery = "SELECT COUNT(*) AS boardcount FROM board_fee WHERE user_id = ?";
+        const [getBoardFeeCount] = await sql_con.promise().query(getBoardFeeCountQuery, [userInfo.idx]);
+        console.log(getBoardFeeCount);
+
+        postCount = getSiteCount[0]['sitecount'] + getBoardFeeCount[0]['boardcount']
+        console.log(postCount);
+
+
     } catch (error) {
 
     }
-    res.json({ userInfo })
+    res.json({ userInfo, postCount })
 })
 
 apiRouter.post('/payment_customerkey_chk', async (req, res, next) => {

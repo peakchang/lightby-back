@@ -5,6 +5,72 @@ import moment from "moment-timezone";
 
 const boardRouter = express.Router();
 
+
+boardRouter.post('/update', async (req, res, next) => {
+    const { item_id, subject, content, imgs } = req.body
+    const now = moment().format('YYYY-MM-DD HH:mm:ss')
+
+    try {
+        const boardUploadQuery = "UPDATE board_fee SET imgs = ?, subject = ?, content = ?, updated_at=? WHERE idx = ? "
+        await sql_con.promise().query(boardUploadQuery, [imgs, subject, content, now, item_id]);
+    } catch (error) {
+        return res.status(400).json({ message: '업로드 실패!' })
+    }
+
+    return res.json({})
+})
+
+boardRouter.post('/load_modify_content', async (req, res, next) => {
+    const { itemIdx, userIdx } = req.body;
+    console.log(itemIdx);
+    console.log(userIdx);
+
+    let modifyContent = {}
+
+    try {
+        const loadModifyContentQuery = "SELECT * FROM board_fee WHERE user_id = ? AND idx = ?";
+        const [loadModifyContent] = await sql_con.promise().query(loadModifyContentQuery, [userIdx, itemIdx]);
+        modifyContent = loadModifyContent[0]
+        console.log(modifyContent);
+
+    } catch (error) {
+
+    }
+
+
+    res.json({ modifyContent })
+})
+
+
+boardRouter.post('/get_manage_board', async (req, res, next) => {
+    const { tabNum, userId } = req.body;
+    console.log(tabNum);
+    console.log(userId);
+
+    // tabNum 이 0이면 site 에서 / 1이면 board_fee 에서 가지고 오기
+    let postList = [];
+    try {
+        let getPostListQuery = ""
+        if (tabNum == 0) {
+            getPostListQuery = "SELECT idx, subject, thumbnail, created_at, product FROM site WHERE user_id =? ORDER BY idx DESC"
+        } else if (tabNum == 1) {
+            getPostListQuery = "SELECT idx, imgs, subject, created_at FROM board_fee WHERE user_id =? ORDER BY idx DESC"
+        }
+
+        const [getPostList] = await sql_con.promise().query(getPostListQuery, [userId]);
+        postList = getPostList
+
+        console.log(postList);
+
+
+    } catch (error) {
+
+    }
+
+    res.json({ postList })
+})
+
+
 boardRouter.post('/chk_like', async (req, res, next) => {
 
     const { user_id, post_id } = req.body;
@@ -110,7 +176,7 @@ boardRouter.post('/load_item', async (req, res, next) => {
         replyList = getReplyList
 
         console.log(replyList);
-        
+
 
     } catch (error) {
         console.error(error.message);
