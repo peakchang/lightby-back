@@ -20,6 +20,11 @@ import { detailRouter } from './routes/detail.js';
 import { boardRouter } from './routes/board.js';
 import { qnaRouter } from './routes/qna.js';
 
+
+import { admEtcRouter } from './routes/adm_etc.js';
+import { admManageRouter } from './routes/adm_manage.js';
+import { admUsersRouter } from './routes/adm_users.js';
+
 app.set('port', process.env.PORT || 4002);
 app.set('trust proxy', '127.0.0.1');
 app.use(express.json());
@@ -54,9 +59,14 @@ app.use('/api/v9/sitelist', sitelistRouter);
 app.use('/api/v9/detail', detailRouter);
 app.use('/api/v9/users', usersRouter);
 app.use('/api/v9/qna', qnaRouter);
-
-
 app.use('/api/v9/board', boardRouter);
+
+
+app.use('/api/v9/adm_etc', admEtcRouter);
+app.use('/api/v9/adm_manage', admManageRouter);
+app.use('/api/v9/adm_users', admUsersRouter);
+
+
 
 
 
