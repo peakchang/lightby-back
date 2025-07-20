@@ -16,12 +16,12 @@ qnaRouter.post('/load_qna_list', async (req, res, next) => {
 
     try {
 
-        const getFaqListQuery = "SELECT * FROM qna WHERE user_rate >= 3 ORDER BY idx DESC";
+        const getFaqListQuery = "SELECT * FROM qna WHERE faq_bool = TRUE ORDER BY idx DESC";
         const [getFaqList] = await sql_con.promise().query(getFaqListQuery);
         faqList = getFaqList
 
 
-        const getQnaListQuery = "SELECT * FROM qna WHERE user_rate is NULL AND user_id = ? ORDER BY idx DESC";
+        const getQnaListQuery = "SELECT * FROM qna WHERE faq_bool = FALSE AND user_id = ? ORDER BY idx DESC";
         const [getQnaList] = await sql_con.promise().query(getQnaListQuery, [userIdx]);
         qnaList = getQnaList
 
@@ -37,8 +37,8 @@ qnaRouter.post('/upload', async (req, res, next) => {
     try {
         const uploadQuestionQuery = "INSERT INTO qna (user_id, question, question_created_at) VALUES (?,?,?)";
         await sql_con.promise().query(uploadQuestionQuery, [userId, questionVal, now]);
-    } catch (error) {
-
+    } catch (err) {
+        console.error(err.message);
     }
     res.json({})
 })

@@ -133,11 +133,17 @@ CREATE TABLE post_likes (
 CREATE TABLE qna (
     idx INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    user_rate INT,
     question TEXT,
     question_created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     answer TEXT,
-    answer_created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    answer_created_at DATETIME,
+    faq_bool BOOLEAN DEFAULT FALSE
+);
+
+
+CREATE TABLE basic_env(
+    base BOOLEAN DEFAULT TRUE,
+    banners TEXT
 );
 
 */
