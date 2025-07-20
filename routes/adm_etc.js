@@ -88,10 +88,9 @@ admEtcRouter.post('/upload_faq', async (req, res, next) => {
 
 
 // 배너 업로드!!
+
+
 admEtcRouter.get('/load_basic_env', async (req, res, next) => {
-
-    console.log('안들어와?!');
-
 
     let basicEnv = {}
     try {

@@ -6,6 +6,18 @@ import moment from "moment-timezone";
 
 const qnaRouter = express.Router();
 
+qnaRouter.post('/upload_qna_answer', async (req, res, next) => {
+    const { qnaAnswer, idx } = req.body;
+
+    try {
+        const uploadQnaAnswerQuery = "UPDATE qna SET answer = ? WHERE idx = ?";
+        await sql_con.promise().query(uploadQnaAnswerQuery, [qnaAnswer, idx]);
+
+    } catch (error) {
+    }
+    res.json({})
+})
+
 qnaRouter.post('/load_qna_list', async (req, res, next) => {
 
     const { userIdx } = req.body;

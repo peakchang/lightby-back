@@ -95,7 +95,7 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
 
     const { mainLocation, searchVal } = req.body
 
-
+    let baseEnv = {}
     let locationQueryStr = ""
     if (mainLocation && mainLocation != '전국') {
         const locationList = mainLocation.split('/')
@@ -141,12 +141,22 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
         const getSiteListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
         const [getSiteList] = await sql_con.promise().query(getSiteListQuery, ['free']);
         site_list = getSiteList
+
+
+        // baseEnv 불러오기!
+        const getBaseEnvQuery = "SELECT * FROM basic_env WHERE base = TRUE";
+        const [getBaseEnv] = await sql_con.promise().query(getBaseEnvQuery);
+
+        if (getBaseEnv.length > 0) {
+            baseEnv = getBaseEnv[0]
+        }
+
     } catch (error) {
         console.error(error.message);
 
     }
 
-    res.json({ premium_list, top_list, site_list })
+    res.json({ premium_list, top_list, site_list, baseEnv })
 })
 
 export { sitelistRouter }
