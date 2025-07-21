@@ -17,6 +17,46 @@ const storage = new Storage({
 });
 
 
+registRouter.post('/delete', async (req, res, next) => {
+    const { idx, delImgs, delThumbnail } = req.body;
+
+    let delImgList = []
+    try {
+
+
+        if (delImgs) {
+            delImgList = delImgs.split(',')
+        }
+
+        if (delThumbnail) {
+            delImgList.push(delThumbnail)
+        }
+
+        for (let i = 0; i < delImgList.length; i++) {
+            const delPath = delImgList[i];
+            const storage = new Storage({
+                projectId: process.env.GCS_PROJECT,
+                keyFilename: process.env.GCS_KEY_FILE,
+            });
+            const bucketName = process.env.GCS_BUCKET_NAME;
+            const bucket = storage.bucket(bucketName);
+            try {
+                await bucket.file(delPath).delete()
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+        const deleteQuery = "DELETE FROM site WHERE idx = ?";
+        await sql_con.promise().query(deleteQuery, [idx]);
+
+
+    } catch (error) {
+
+    }
+    res.json({})
+})
+
 registRouter.post('/update', async (req, res, next) => {
 
     const { allData } = req.body;
@@ -36,9 +76,6 @@ registRouter.post('/update', async (req, res, next) => {
     } catch (error) {
 
     }
-
-
-
 
     res.json({})
 })
