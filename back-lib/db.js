@@ -23,8 +23,8 @@ CREATE DATABASE lightby default CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicod
 CREATE TABLE IF NOT EXISTS site(
     idx INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id VARCHAR(10) NOT NULL,
-    imgs TEXT NOT NULL,
-    thumbnail VARCHAR(255) NOT NULL,
+    imgs TEXT,
+    thumbnail VARCHAR(255),
     subject VARCHAR(255) NOT NULL,
     point TEXT,
     addr VARCHAR(100) NOT NULL,
@@ -53,6 +53,14 @@ CREATE TABLE IF NOT EXISTS site(
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+0721 수정!! thumbnail / imgs NOT NULL 빼기!!
+ALTER TABLE site MODIFY COLUMN imgs TEXT NULL;
+ALTER TABLE site MODIFY COLUMN thumbnail VARCHAR(255) NULL;
+
+
+-----------------
+
 
 ALTER TABLE site ADD COLUMN thumbnail VARCHAR(255) NOT NULL AFTER imgs;
 ALTER TABLE site ADD COLUMN longtitude VARCHAR(100) NOT NULL AFTER res_addr;

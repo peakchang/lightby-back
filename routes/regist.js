@@ -145,34 +145,38 @@ registRouter.post('/upload', async (req, res, next) => {
 
     try {
         // 썸네일 만들어서 저장!
-        const gcsPath = allData.imgs.split(',')[0]
-        let thumbName = ""
-        if (gcsPath.split('.')[1] != 'gif') {
-            const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
-            const file = bucket.file(gcsPath);
-            const [buffer] = await file.download();
 
-            // // 2) 썸네일 생성 (가운데 잘라서 180x180)
-            const thumbBuffer = await sharp(buffer)
-                .resize(THUMB_SIZE.w, THUMB_SIZE.h, { fit: 'cover', position: 'centre' })
-                .toFormat('jpeg', { quality: 80 })
-                .toBuffer();
+        if (allData.imgs) {
+            const gcsPath = allData.imgs.split(',')[0]
+            let thumbName = ""
+            if (gcsPath.split('.')[1] != 'gif') {
+                const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
+                const file = bucket.file(gcsPath);
+                const [buffer] = await file.download();
 
-            const originFile = gcsPath.split('/').pop();
-            const today = moment().tz('Asia/Seoul').format('YYMMDD');
-            thumbName = `imgs/imgs${today}/thumb-${originFile}`;
-            const thumbFile = bucket.file(thumbName);
+                // // 2) 썸네일 생성 (가운데 잘라서 180x180)
+                const thumbBuffer = await sharp(buffer)
+                    .resize(THUMB_SIZE.w, THUMB_SIZE.h, { fit: 'cover', position: 'centre' })
+                    .toFormat('jpeg', { quality: 80 })
+                    .toBuffer();
 
-            // 업로드 하기!!!
-            await thumbFile.save(thumbBuffer, {
-                contentType: 'image/jpeg',
-                resumable: false,
-                predefinedAcl: 'publicRead',          // ← 핵심
-                metadata: { cacheControl: 'public,max-age=31536000' }
-            });
+                const originFile = gcsPath.split('/').pop();
+                const today = moment().tz('Asia/Seoul').format('YYMMDD');
+                thumbName = `imgs/imgs${today}/thumb-${originFile}`;
+                const thumbFile = bucket.file(thumbName);
+
+                // 업로드 하기!!!
+                await thumbFile.save(thumbBuffer, {
+                    contentType: 'image/jpeg',
+                    resumable: false,
+                    predefinedAcl: 'publicRead',          // ← 핵심
+                    metadata: { cacheControl: 'public,max-age=31536000' }
+                });
+            }
+
+            allData['thumbnail'] = thumbName
         }
 
-        allData['thumbnail'] = thumbName
 
     } catch (err) {
         console.error(err.message);
@@ -181,6 +185,8 @@ registRouter.post('/upload', async (req, res, next) => {
     try {
         const queryStr = getQueryStr(allData, 'insert', 'created_at')
         const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
+        console.log(siteInsertQuery);
+        
         await sql_con.promise().query(siteInsertQuery, queryStr.values);
     } catch (err) {
         console.error(err.message);
