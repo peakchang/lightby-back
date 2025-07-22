@@ -27,7 +27,7 @@ apiRouter.get('/today_update', async (req, res, next) => {
         expires: midnight,
         httpOnly: true,
         // secure: false,          // ★ 개발 환경은 반드시 false!
-        // sameSite: 'lax'
+        sameSite: 'lax'
     });
 
     console.log(req.cookies); // 모든 쿠키 객체
