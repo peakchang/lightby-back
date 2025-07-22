@@ -3,9 +3,10 @@ import { sql_con } from "../back-lib/db.js";
 import bcrypt from 'bcrypt';
 import { Storage } from "@google-cloud/storage";
 import moment from "moment-timezone";
+import cookieParser from "cookie-parser";
 
 const apiRouter = express.Router();
-
+apiRouter.use(cookieParser());
 
 
 // 최초 진입시 사이트 TODAY inser or update!!!
@@ -14,10 +15,31 @@ apiRouter.get('/today_update', async (req, res, next) => {
 
     console.log('처음 여기 들어오뉘!?!?!');
 
-    const today = moment().format('YYYY-MM-DD HH:mm')
+    const today = moment().format('YYYY-MM-DD')
     console.log(today);
-    
-    
+
+
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0); // 자정 = 오늘 24:00:00.000
+
+    res.cookie('visit', 'myVisit', {
+        expires: midnight,
+        httpOnly: true,
+        // secure: false,          // ★ 개발 환경은 반드시 false!
+        // sameSite: 'lax'
+    });
+
+    console.log(req.cookies); // 모든 쿠키 객체
+    console.log(req.cookies.visit); // 특정 쿠키 값
+
+    try {
+        const topdayCountChkQuery = "SELECT idx FROM "
+    } catch (error) {
+
+    }
+
+
 
     res.status(200).json({})
 })

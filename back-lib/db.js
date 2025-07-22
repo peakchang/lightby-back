@@ -154,4 +154,11 @@ CREATE TABLE basic_env(
     banners TEXT
 );
 
+CREATE TABLE today_count(
+    idx INT AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    fake_count INT,
+    real_count INT
+);
+
 */
