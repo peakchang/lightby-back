@@ -24,11 +24,15 @@ apiRouter.get('/today_update', async (req, res, next) => {
     midnight.setHours(24, 0, 0, 0); // 자정 = 오늘 24:00:00.000
 
     res.cookie('visit', 'myVisit', {
-        expires: midnight,
+        // expires: midnight,
         httpOnly: true,
-        // secure: false,          // ★ 개발 환경은 반드시 false!
-        sameSite: 'lax'
+        secure: false,          // ★ 개발 환경은 반드시 false!
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000 // 24시간
     });
+
+    console.log(req);
+
 
     console.log(req.cookies); // 모든 쿠키 객체
     console.log(req.cookies.visit); // 특정 쿠키 값
