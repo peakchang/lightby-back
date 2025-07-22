@@ -52,7 +52,7 @@ boardRouter.post('/get_manage_board', async (req, res, next) => {
     try {
         let getPostListQuery = ""
         if (tabNum == 0) {
-            getPostListQuery = "SELECT idx, subject, thumbnail, created_at, product FROM site WHERE user_id =? ORDER BY idx DESC"
+            getPostListQuery = "SELECT idx, subject, imgs, thumbnail, created_at, product FROM site WHERE user_id =? ORDER BY idx DESC"
         } else if (tabNum == 1) {
             getPostListQuery = "SELECT idx, imgs, subject, created_at FROM board_fee WHERE user_id =? ORDER BY idx DESC"
         }

@@ -2,8 +2,28 @@ import express from "express";
 import { sql_con } from "../back-lib/db.js";
 import bcrypt from 'bcrypt';
 import { Storage } from "@google-cloud/storage";
+import moment from "moment-timezone";
 
 const apiRouter = express.Router();
+
+
+
+// 최초 진입시 사이트 TODAY inser or update!!!
+
+apiRouter.get('/today_update', async (req, res, next) => {
+
+    console.log('처음 여기 들어오뉘!?!?!');
+
+    const today = moment().format('YYYY-MM-DD HH:mm')
+    console.log(today);
+    
+    
+
+    res.status(200).json({})
+})
+
+
+
 
 apiRouter.post('/update_interest', async (req, res, next) => {
     const { idx, jsonStr } = req.body
