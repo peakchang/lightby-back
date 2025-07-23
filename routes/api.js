@@ -3,49 +3,43 @@ import { sql_con } from "../back-lib/db.js";
 import bcrypt from 'bcrypt';
 import { Storage } from "@google-cloud/storage";
 import moment from "moment-timezone";
-import cookieParser from "cookie-parser";
+// import cookieParser from "cookie-parser";
 
 const apiRouter = express.Router();
-apiRouter.use(cookieParser());
 
 
-// 최초 진입시 사이트 TODAY inser or update!!!
+apiRouter.get('/load_main_count', async (req, res, next) => {
 
-apiRouter.get('/today_update', async (req, res, next) => {
-
-    console.log('처음 여기 들어오뉘!?!?!');
-
+    let todayCount = 0;
+    let newSiteCount = 0;
+    let baseEnv = {}
     const today = moment().format('YYYY-MM-DD')
-    console.log(today);
-
-
-    const now = new Date();
-    const midnight = new Date(now);
-    midnight.setHours(24, 0, 0, 0); // 자정 = 오늘 24:00:00.000
-
-    res.cookie('visit', 'myVisit', {
-        // expires: midnight,
-        httpOnly: true,
-        secure: false,          // ★ 개발 환경은 반드시 false!
-        sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000 // 24시간
-    });
-
-    console.log(req);
-
-
-    console.log(req.cookies); // 모든 쿠키 객체
-    console.log(req.cookies.visit); // 특정 쿠키 값
-
     try {
-        const topdayCountChkQuery = "SELECT idx FROM "
+        const getTodayCountQuery = "SELECT fake_count FROM today_count WHERE date = ?";
+        const [getTodayCount] = await sql_con.promise().query(getTodayCountQuery, [today]);
+
+        if (getTodayCount.length > 0) {
+            todayCount = getTodayCount[0]['fake_count']
+        }
+
+        const getJobPostCountQuery = "SELECT COUNT(*) AS site_count FROM site WHERE created_at >= DATE_SUB(DATE(NOW()), INTERVAL 7 DAY);"
+        const [getJobPostCount] = await sql_con.promise().query(getJobPostCountQuery);
+
+        newSiteCount = getJobPostCount[0]['site_count']
+
+        // baseEnv 불러오기!
+        const getBaseEnvQuery = "SELECT * FROM basic_env WHERE base = TRUE";
+        const [getBaseEnv] = await sql_con.promise().query(getBaseEnvQuery);
+
+        if (getBaseEnv.length > 0) {
+            baseEnv = getBaseEnv[0]
+        }
+
     } catch (error) {
 
     }
 
-
-
-    res.status(200).json({})
+    res.json({ todayCount, newSiteCount, baseEnv })
 })
 
 
@@ -176,20 +170,13 @@ apiRouter.post('/load_user_info', async (req, res, next) => {
         const loadUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
         const [loadUserInfo] = await sql_con.promise().query(loadUserInfoQuery, [userIdx]);
         userInfo = loadUserInfo[0]
-
-
-        console.log(userInfo);
-
         const getSiteCountQuery = "SELECT COUNT(*) AS sitecount FROM site WHERE user_id = ?";
         const [getSiteCount] = await sql_con.promise().query(getSiteCountQuery, [userInfo.idx]);
-        console.log(getSiteCount);
 
         const getBoardFeeCountQuery = "SELECT COUNT(*) AS boardcount FROM board_fee WHERE user_id = ?";
         const [getBoardFeeCount] = await sql_con.promise().query(getBoardFeeCountQuery, [userInfo.idx]);
-        console.log(getBoardFeeCount);
-
         postCount = getSiteCount[0]['sitecount'] + getBoardFeeCount[0]['boardcount']
-        console.log(postCount);
+
 
 
     } catch (error) {

@@ -13,7 +13,6 @@ const sitelistRouter = express.Router();
 
 
 sitelistRouter.post('/get_interest_list', async (req, res, next) => {
-    console.log('gkgkgkgkgkg');
 
     const { userId, type } = req.body;
     let interestStatus = false;
@@ -24,7 +23,6 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
         if (type == 'interest') {
             const getUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
             const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [userId]);
-            console.log(getUserInfo[0]['interest']);
 
             // 관심 분야 설정 안되어 있으면 return 처리!
             if (!getUserInfo[0]['interest']) {
@@ -61,7 +59,6 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
             AND post_likes.is_liked = 1
             ORDER BY site.idx DESC;`
 
-            console.log(userId);
 
             const [getZzimList] = await sql_con.promise().query(getZzimListQuery, [userId]);
             if (getZzimList.length == 0) {
@@ -93,9 +90,18 @@ function buildLikeClause(field, keywords) {
 // 메인 페이지 사이트 리스트!!!
 sitelistRouter.post('/load_site_list', async (req, res, next) => {
 
-    const { mainLocation, searchVal } = req.body
+    const { mainLocation, searchVal, siteLoadStatus, freeStartNum } = req.body
 
-    let baseEnv = {}
+    console.log(siteLoadStatus);
+
+
+    let loadSiteList = [];
+    let currentStatus = ""
+    let setNextStatus = ""
+    let nextStartNum = 0
+
+
+
     let locationQueryStr = ""
     if (mainLocation && mainLocation != '전국') {
         const locationList = mainLocation.split('/')
@@ -114,49 +120,112 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
     let searchQueryStr = ""
     if (searchVal) {
         searchQueryStr = ` AND subject LIKE '%${searchVal}%'`
+    }
 
+    let addFilterQueryStr = "";
+    if (siteLoadStatus != 'free') {
+        addFilterQueryStr = ` AND created_at >= DATE_SUB(DATE(NOW()), INTERVAL 10 DAY)`
     }
 
 
-    let premium_list = [];
-    let top_list = [];
-    let site_list = [];
+
 
     const rows = "idx,location,thumbnail,imgs,subject,point,fee_type,fee,business,occupation,icons"
     try {
-        const getPremiumListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
 
-        console.log(getPremiumListQuery);
+        // if (siteLoadStatus == 'premium') {
+        //     const getSiteListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} ORDER BY idx DESC`
+        //     const [getPremiumList] = await sql_con.promise().query(getSiteListQuery, ['premium']);
+        //     if (getPremiumList.length > 0) {
+        //         loadSiteList = getPremiumList
+        //         setNextStatus = 'top'
+        //     } else {
+        //         const getTopListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} ORDER BY idx DESC`
+        //         const [getTopList] = await sql_con.promise().query(getTopListQuery, ['top']);
+
+        //         if (getTopList.length > 0) {
+        //             loadSiteList = getTopList
+        //             setNextStatus = 'free'
+        //         } else {
+        //             const getSiteListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC LIMIT 10`
+        //             const [getSiteList] = await sql_con.promise().query(getSiteListQuery, ['free']);
+        //             loadSiteList = getSiteList
+        //             setNextStatus = 'free'
+        //         }
+
+        //     }
+
+        // } else if (siteLoadStatus == 'top') {
+        //     console.log('여기는 안와?!');
+
+        //     const getTopListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} ORDER BY idx DESC`
+        //     const [getTopList] = await sql_con.promise().query(getTopListQuery, ['top']);
+        //     if (getTopList.length > 0) {
+        //         loadSiteList = getTopList
+        //     } else {
+        //         const getSiteListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
+        //         const [getSiteList] = await sql_con.promise().query(getSiteListQuery, ['free']);
+        //         loadSiteList = getSiteList
+        //     }
 
 
-        const [getPremiumList] = await sql_con.promise().query(getPremiumListQuery, ['premium']);
-        premium_list = getPremiumList
+        // } else {
+        //     const getSiteListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
+        //     const [getSiteList] = await sql_con.promise().query(getSiteListQuery, ['free']);
+        //     loadSiteList = getSiteList
+        // }
 
+        const productPriority = ['premium', 'top', 'free'];
 
+        const getQuery = (product) => {
+            if (product === 'free') {
+                nextStartNum = freeStartNum + 10
+                return `SELECT ${rows} FROM site 
+                WHERE (product = ? OR product IS NULL OR product = '') 
+                ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC LIMIT ${freeStartNum}, 10`;
 
-        const getTopListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
-        const [getTopList] = await sql_con.promise().query(getTopListQuery, ['top']);
-        top_list = getTopList
+            } else {
+                return `SELECT ${rows} FROM site 
+                WHERE product = ? 
+                ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} 
+                ORDER BY idx DESC`;
+            }
+        };
 
-        const getSiteListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
-        const [getSiteList] = await sql_con.promise().query(getSiteListQuery, ['free']);
-        site_list = getSiteList
+        let currentIndex = productPriority.indexOf(siteLoadStatus);
+        let loadFound = false;
 
+        while (currentIndex < productPriority.length && !loadFound) {
+            const currentProduct = productPriority[currentIndex];
+            currentStatus = currentProduct
+            console.log(`currentProduct : ${currentProduct}`);
 
-        // baseEnv 불러오기!
-        const getBaseEnvQuery = "SELECT * FROM basic_env WHERE base = TRUE";
-        const [getBaseEnv] = await sql_con.promise().query(getBaseEnvQuery);
+            const [result] = await sql_con.promise().query(getQuery(currentProduct), [currentProduct]);
 
-        if (getBaseEnv.length > 0) {
-            baseEnv = getBaseEnv[0]
+            if (result.length > 0) {
+                loadSiteList = result;
+                setNextStatus = productPriority[Math.min(currentIndex + 1, productPriority.length - 1)];
+                loadFound = true;
+            } else {
+                currentIndex++;
+            }
         }
+
+        // fallback: 아무것도 없으면 free로 한 번 더 시도
+        if (!loadFound) {
+            const [fallback] = await sql_con.promise().query(getQuery('free'), ['free']);
+            loadSiteList = fallback;
+            setNextStatus = 'free';
+        }
+
+
 
     } catch (error) {
         console.error(error.message);
 
     }
 
-    res.json({ premium_list, top_list, site_list, baseEnv })
+    res.json({ loadSiteList, currentStatus, setNextStatus, nextStartNum })
 })
 
 export { sitelistRouter }

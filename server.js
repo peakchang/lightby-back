@@ -29,8 +29,8 @@ app.set('port', process.env.PORT || 4002);
 app.set('trust proxy', '127.0.0.1');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(process.env.COOKIE_SECRET))
-
+// app.use(cookieParser(process.env.COOKIE_SECRET))
+app.use(cookieParser())
 // ESM 오류 해결을 위해 __dirname, __filename 직접 변수 작성
 // import { fileURLToPath } from 'url';
 // import { dirname } from 'path';
@@ -71,6 +71,7 @@ app.use('/api/v9/adm_users', admUsersRouter);
 
 
 app.get('/chkserver', (req, res) => {
+    
     res.send('서버 생성 완료!!!!')
 })
 

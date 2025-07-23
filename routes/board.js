@@ -193,24 +193,35 @@ boardRouter.post('/load_list', async (req, res, next) => {
     try {
         // const loadBoardList = `SELECT * FROM board_fee ORDER BY idx DESC LIMIT ${startNum}, 10`;
         const loadBoardList =
-            `SELECT bf.*, 
-            u.nickname, u.profile_thumbnail, u.profile_image,
-            COUNT(r.idx) AS reply_count
-            FROM
-            board_fee bf
-            LEFT JOIN
-            users u ON bf.user_id = u.idx
+            `SELECT 
+                bf.*, 
+                u.nickname, 
+                u.profile_thumbnail, 
+                u.profile_image,
+                IFNULL(r.reply_count, 0) AS reply_count,
+                IFNULL(p.like_count, 0) AS post_likes
+            FROM 
+                board_fee bf
             LEFT JOIN 
-            reply r ON bf.idx = r.bo_id
-            GROUP BY 
-            bf.idx
+                users u ON bf.user_id = u.idx
+            LEFT JOIN (
+                SELECT bo_id, COUNT(*) AS reply_count
+                FROM reply
+                GROUP BY bo_id
+            ) r ON bf.idx = r.bo_id
+            LEFT JOIN (
+                SELECT post_id, COUNT(*) AS like_count
+                FROM post_likes
+                GROUP BY post_id
+            ) p ON bf.idx = p.post_id
             ORDER BY 
-            bf.idx DESC 
+                bf.idx DESC 
             LIMIT ${startNum}, 10`
         const [loadBoard] = await sql_con.promise().query(loadBoardList);
         board_list = loadBoard
 
-    } catch (error) {
+    } catch (err) {
+        console.error(err.message);
 
     }
     return res.json({ board_list })
