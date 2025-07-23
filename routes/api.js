@@ -35,6 +35,8 @@ apiRouter.get('/load_main_count', async (req, res, next) => {
             baseEnv = getBaseEnv[0]
         }
 
+        console.log(baseEnv);
+        
     } catch (error) {
 
     }
