@@ -18,7 +18,6 @@ admUsersRouter.post('/get_users', async (req, res, next) => {
         const getUserCountQuery = "SELECT COUNT(*) AS allcount FROM users WHERE rate < 5";
         const [getUserCount] = await sql_con.promise().query(getUserCountQuery);
         allCount = getUserCount[0]['allcount']
-        console.log(allCount);
 
 
         const getUsersQuery = `SELECT * FROM users ORDER BY idx DESC LIMIT ${startNum}, ${pageCount}`

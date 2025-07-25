@@ -64,6 +64,9 @@ ALTER TABLE site MODIFY COLUMN thumbnail VARCHAR(255) NULL;
 ALTER TABLE site ADD COLUMN view_count INT DEFAULT 0 AFTER payment_key;
 ALTER TABLE board_fee ADD COLUMN view_count INT DEFAULT 0 AFTER content;
 
+0725 수정!!  추가!!
+ALTER TABLE site ADD COLUMN ad_start_date DATE AFTER view_count;
+
 -----------------
 
 
