@@ -11,15 +11,12 @@ const admManageRouter = express.Router();
 
 admManageRouter.post('/delete_post', async (req, res, next) => {
 
-    console.log('여기는 안오는거야?!?!');
 
     const { idx, delImgs } = req.body;
     try {
 
 
         const delImgList = delImgs.split(',')
-
-        console.log(delImgList);
 
 
         for (let i = 0; i < delImgList.length; i++) {
@@ -33,8 +30,6 @@ admManageRouter.post('/delete_post', async (req, res, next) => {
             try {
                 await bucket.file(delPath).delete()
             } catch (error) {
-                console.log('에러 나니?!?!');
-                
                 console.error(error.message);
             }
         }
@@ -51,7 +46,6 @@ admManageRouter.post('/delete_post', async (req, res, next) => {
 
 admManageRouter.post('/load_post_list', async (req, res, next) => {
     const { page } = req.body;
-    console.log(page);
 
     let postList = []
     try {
@@ -112,7 +106,7 @@ admManageRouter.post('/delete_job', async (req, res, next) => {
 
 admManageRouter.post('/load_joboffer_list', async (req, res, next) => {
 
-    console.log('여긴 또 아놔?!?!');
+
 
     const { page } = req.body;
     let jobOfferList = [];

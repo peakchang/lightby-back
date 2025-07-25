@@ -9,11 +9,15 @@ const qnaRouter = express.Router();
 qnaRouter.post('/upload_qna_answer', async (req, res, next) => {
     const { qnaAnswer, idx } = req.body;
 
+    console.log('여기 진입은 하지?!');
+    console.log(`qnaAnswer : ${qnaAnswer} / idx : ${idx}`);
+    
+    
     try {
         const uploadQnaAnswerQuery = "UPDATE qna SET answer = ? WHERE idx = ?";
         await sql_con.promise().query(uploadQnaAnswerQuery, [qnaAnswer, idx]);
-
     } catch (error) {
+        console.error(error.message);
     }
     res.json({})
 })
@@ -21,7 +25,6 @@ qnaRouter.post('/upload_qna_answer', async (req, res, next) => {
 qnaRouter.post('/load_qna_list', async (req, res, next) => {
 
     const { userIdx } = req.body;
-    console.log(userIdx);
 
     let faqList = [];
     let qnaList = [];

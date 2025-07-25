@@ -9,9 +9,7 @@ const apiRouter = express.Router();
 
 // 게시물들 조회수 올리기!!
 apiRouter.post('/raise_view_count', async (req, res, next) => {
-    console.log('일단 백 진입?');
     const { table, idx } = req.body
-    console.log(table, idx);
 
     try {
         const getSiteViewCountQuery = `SELECT view_count FROM ${table} WHERE idx = ?`;

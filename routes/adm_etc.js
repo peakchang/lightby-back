@@ -10,7 +10,6 @@ const admEtcRouter = express.Router();
 
 admEtcRouter.post('/load_modify_faq', async (req, res, next) => {
     const { idx } = req.body;
-    console.log(idx);
     let faqData = {}
     try {
         const loadModifyFaqQuery = "SELECT * FROM qna WHERE idx = ?";
@@ -37,7 +36,11 @@ admEtcRouter.post('/load_qna_list', async (req, res, next) => {
         }
 
         // const loadQnaListQuery = "SELECT * FROM qna WHERE faq_bool = FALSE ORDER BY idx DESC";
-        const loadQnaListQuery = `SELECT qna.*, users.*
+        const loadQnaListQuery = `SELECT qna.*,
+                users.idx AS user_idx,
+                users.id AS user_id,
+                users.nickname AS user_nickname,
+                users.name AS user_name
                 FROM qna
                 JOIN users ON qna.user_id = users.idx
                 WHERE qna.faq_bool = FALSE
@@ -45,8 +48,6 @@ admEtcRouter.post('/load_qna_list', async (req, res, next) => {
         const [loadQnaList] = await sql_con.promise().query(loadQnaListQuery);
         if (loadQnaList.length > 0) {
             qnaList = loadQnaList
-            console.log(qnaList);
-
         }
     } catch (error) {
 
@@ -58,9 +59,6 @@ admEtcRouter.post('/load_qna_list', async (req, res, next) => {
 admEtcRouter.post('/upload_faq', async (req, res, next) => {
 
     const { user_id, faqQuestion, faqAnswer, type, modifyIdx } = req.body;
-
-    console.log(faqQuestion);
-    console.log(faqAnswer);
 
     try {
 
@@ -109,8 +107,6 @@ admEtcRouter.get('/load_basic_env', async (req, res, next) => {
 })
 
 admEtcRouter.post('/upload_banners', async (req, res, next) => {
-    console.log('진입 하지?');
-
     const { bannerImgs, bannerLinks } = req.body;
 
     try {

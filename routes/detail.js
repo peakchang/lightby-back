@@ -20,8 +20,6 @@ detailRouter.post('/', async (req, res, next) => {
         const favBoolChkQuery = "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ? AND is_liked = TRUE";
         const [favBoolChk] = await sql_con.promise().query(favBoolChkQuery, [userId, idx]);
 
-        console.log(favBoolChk);
-
 
         if (favBoolChk.length > 0) {
             favorateBool = true;
@@ -41,9 +39,6 @@ detailRouter.post('/', async (req, res, next) => {
 detailRouter.post('/postlike_act', async (req, res, next) => {
     const { type, user_id, item_id } = req.body;
 
-    console.log(`type : ${type} // user_id : ${user_id} // item_id : ${item_id}`);
-
-
     const now = moment().tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
 
     if (type == 'fav') {
@@ -52,8 +47,6 @@ detailRouter.post('/postlike_act', async (req, res, next) => {
         try {
             const getPostLikeQuery = "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ?";
             const [getPostLike] = await sql_con.promise().query(getPostLikeQuery, [user_id, item_id]);
-
-            console.log(getPostLike);
 
             if (getPostLike.length == 0) {
                 const insertPostLikeQuery = "INSERT INTO post_likes (user_id, post_id) VALUES (?,?)"

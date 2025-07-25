@@ -60,13 +60,11 @@ registRouter.post('/delete', async (req, res, next) => {
 registRouter.post('/update', async (req, res, next) => {
 
     const { allData } = req.body;
-    console.log(allData);
 
     const itemIdx = allData.idx;
     ['idx', 'sum', 'product', 'created_at', 'updated_at'].forEach(key => delete allData[key]);
 
     const queryStr = getQueryStr(allData, 'update', 'updated_at')
-    console.log(queryStr);
 
     queryStr.values.push(itemIdx)
 
@@ -83,9 +81,6 @@ registRouter.post('/update', async (req, res, next) => {
 registRouter.post('/load_modify_content', async (req, res, next) => {
     const { userId, modifyIdx } = req.body;
 
-    console.log(userId);
-    console.log(modifyIdx);
-
 
     let modifyContent = {}
     try {
@@ -99,10 +94,6 @@ registRouter.post('/load_modify_content', async (req, res, next) => {
             const [loadModifyContent] = await sql_con.promise().query(loadModifyContentQuery, [userId, modifyIdx]);
             modifyContent = loadModifyContent[0]
         }
-
-
-
-        console.log(modifyContent);
 
     } catch (err) {
         console.error(err.message);
@@ -200,7 +191,6 @@ registRouter.post('/upload', async (req, res, next) => {
     try {
         const queryStr = getQueryStr(allData, 'insert', 'created_at')
         const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
-        console.log(siteInsertQuery);
 
         await sql_con.promise().query(siteInsertQuery, queryStr.values);
     } catch (err) {

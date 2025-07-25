@@ -22,8 +22,6 @@ boardRouter.post('/update', async (req, res, next) => {
 
 boardRouter.post('/load_modify_content', async (req, res, next) => {
     const { itemIdx, userIdx } = req.body;
-    console.log(itemIdx);
-    console.log(userIdx);
 
     let modifyContent = {}
 
@@ -31,7 +29,6 @@ boardRouter.post('/load_modify_content', async (req, res, next) => {
         const loadModifyContentQuery = "SELECT * FROM board_fee WHERE user_id = ? AND idx = ?";
         const [loadModifyContent] = await sql_con.promise().query(loadModifyContentQuery, [userIdx, itemIdx]);
         modifyContent = loadModifyContent[0]
-        console.log(modifyContent);
 
     } catch (error) {
 
@@ -44,8 +41,6 @@ boardRouter.post('/load_modify_content', async (req, res, next) => {
 
 boardRouter.post('/get_manage_board', async (req, res, next) => {
     const { tabNum, userId } = req.body;
-    console.log(tabNum);
-    console.log(userId);
 
     // tabNum 이 0이면 site 에서 / 1이면 board_fee 에서 가지고 오기
     let postList = [];
@@ -59,8 +54,6 @@ boardRouter.post('/get_manage_board', async (req, res, next) => {
 
         const [getPostList] = await sql_con.promise().query(getPostListQuery, [userId]);
         postList = getPostList
-
-        console.log(postList);
 
 
     } catch (error) {
@@ -174,8 +167,6 @@ boardRouter.post('/load_item', async (req, res, next) => {
         `;
         const [getReplyList] = await sql_con.promise().query(getReplyListQuery, [postItem.idx]);
         replyList = getReplyList
-
-        console.log(replyList);
 
 
     } catch (error) {
