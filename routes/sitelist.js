@@ -90,15 +90,13 @@ function buildLikeClause(field, keywords) {
 // 메인 페이지 사이트 리스트!!!
 sitelistRouter.post('/load_site_list', async (req, res, next) => {
 
-    const { mainLocation, searchVal, siteLoadStatus, freeStartNum } = req.body
-
-    console.log(siteLoadStatus);
+    const { mainLocation, searchVal, } = req.body
 
 
-    let loadSiteList = [];
-    let currentStatus = ""
-    let setNextStatus = ""
-    let nextStartNum = 0
+    // let loadSiteList = [];
+    // let currentStatus = ""
+    // let setNextStatus = ""
+    // let nextStartNum = 0
 
 
 
@@ -122,101 +120,84 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
         searchQueryStr = ` AND subject LIKE '%${searchVal}%'`
     }
 
-    let addFilterQueryStr = "";
-    if (siteLoadStatus != 'free') {
-        addFilterQueryStr = ` AND created_at >= DATE_SUB(DATE(NOW()), INTERVAL 10 DAY)`
-    }
+    let adFilterQueryStr = ` AND created_at >= DATE_SUB(DATE(NOW()), INTERVAL 10 DAY)`
+    // if (siteLoadStatus != 'free') {
+    //     addFilterQueryStr = ` AND created_at >= DATE_SUB(DATE(NOW()), INTERVAL 10 DAY)`
+    // }
 
 
-
+    let premiumList = [];
+    let topList = [];
+    let freeList = [];
 
     const rows = "idx,location,thumbnail,imgs,subject,point,fee_type,fee,business,occupation,icons"
     try {
 
-        // if (siteLoadStatus == 'premium') {
-        //     const getSiteListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} ORDER BY idx DESC`
-        //     const [getPremiumList] = await sql_con.promise().query(getSiteListQuery, ['premium']);
-        //     if (getPremiumList.length > 0) {
-        //         loadSiteList = getPremiumList
-        //         setNextStatus = 'top'
+        const getPremiumListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${adFilterQueryStr} ORDER BY idx DESC`
+        const [getPremiumList] = await sql_con.promise().query(getPremiumListQuery, ['premium']);
+
+        premiumList = getPremiumList
+
+
+        const getTopListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${adFilterQueryStr} ORDER BY idx DESC`
+        const [getTopList] = await sql_con.promise().query(getTopListQuery, ['top']);
+
+        topList = getTopList
+
+
+        const getFreeListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
+        const [getFreeList] = await sql_con.promise().query(getFreeListQuery, ['free']);
+
+        freeList = getFreeList
+
+
+
+
+        // 프리미엄 / 탑 / 프리 순서로 뽑는거, 추후 스크롤 내릴때 적용 시키기!!!
+        // const productPriority = ['premium', 'top', 'free'];
+
+        // const getQuery = (product) => {
+        //     if (product === 'free') {
+        //         nextStartNum = freeStartNum + 10
+        //         console.log(nextStartNum);
+
+        //         return `SELECT ${rows} FROM site 
+        //         WHERE (product = ? OR product IS NULL OR product = '') 
+        //         ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC LIMIT ${freeStartNum}, 10`;
+
         //     } else {
-        //         const getTopListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} ORDER BY idx DESC`
-        //         const [getTopList] = await sql_con.promise().query(getTopListQuery, ['top']);
-
-        //         if (getTopList.length > 0) {
-        //             loadSiteList = getTopList
-        //             setNextStatus = 'free'
-        //         } else {
-        //             const getSiteListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC LIMIT 10`
-        //             const [getSiteList] = await sql_con.promise().query(getSiteListQuery, ['free']);
-        //             loadSiteList = getSiteList
-        //             setNextStatus = 'free'
-        //         }
-
+        //         return `SELECT ${rows} FROM site 
+        //         WHERE product = ? 
+        //         ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} 
+        //         ORDER BY idx DESC`;
         //     }
+        // };
 
-        // } else if (siteLoadStatus == 'top') {
-        //     console.log('여기는 안와?!');
+        // let currentIndex = productPriority.indexOf(siteLoadStatus);
+        // let loadFound = false;
 
-        //     const getTopListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} ORDER BY idx DESC`
-        //     const [getTopList] = await sql_con.promise().query(getTopListQuery, ['top']);
-        //     if (getTopList.length > 0) {
-        //         loadSiteList = getTopList
+        // while (currentIndex < productPriority.length && !loadFound) {
+        //     const currentProduct = productPriority[currentIndex];
+        //     currentStatus = currentProduct
+        //     console.log(`currentProduct : ${currentProduct}`);
+
+        //     const [result] = await sql_con.promise().query(getQuery(currentProduct), [currentProduct]);
+
+        //     if (result.length > 0) {
+        //         loadSiteList = result;
+        //         setNextStatus = productPriority[Math.min(currentIndex + 1, productPriority.length - 1)];
+        //         loadFound = true;
         //     } else {
-        //         const getSiteListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
-        //         const [getSiteList] = await sql_con.promise().query(getSiteListQuery, ['free']);
-        //         loadSiteList = getSiteList
+        //         currentIndex++;
         //     }
-
-
-        // } else {
-        //     const getSiteListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
-        //     const [getSiteList] = await sql_con.promise().query(getSiteListQuery, ['free']);
-        //     loadSiteList = getSiteList
         // }
 
-        const productPriority = ['premium', 'top', 'free'];
-
-        const getQuery = (product) => {
-            if (product === 'free') {
-                nextStartNum = freeStartNum + 10
-                return `SELECT ${rows} FROM site 
-                WHERE (product = ? OR product IS NULL OR product = '') 
-                ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC LIMIT ${freeStartNum}, 10`;
-
-            } else {
-                return `SELECT ${rows} FROM site 
-                WHERE product = ? 
-                ${locationQueryStr}${searchQueryStr}${addFilterQueryStr} 
-                ORDER BY idx DESC`;
-            }
-        };
-
-        let currentIndex = productPriority.indexOf(siteLoadStatus);
-        let loadFound = false;
-
-        while (currentIndex < productPriority.length && !loadFound) {
-            const currentProduct = productPriority[currentIndex];
-            currentStatus = currentProduct
-            console.log(`currentProduct : ${currentProduct}`);
-
-            const [result] = await sql_con.promise().query(getQuery(currentProduct), [currentProduct]);
-
-            if (result.length > 0) {
-                loadSiteList = result;
-                setNextStatus = productPriority[Math.min(currentIndex + 1, productPriority.length - 1)];
-                loadFound = true;
-            } else {
-                currentIndex++;
-            }
-        }
-
-        // fallback: 아무것도 없으면 free로 한 번 더 시도
-        if (!loadFound) {
-            const [fallback] = await sql_con.promise().query(getQuery('free'), ['free']);
-            loadSiteList = fallback;
-            setNextStatus = 'free';
-        }
+        // // fallback: 아무것도 없으면 free로 한 번 더 시도
+        // if (!loadFound) {
+        //     const [fallback] = await sql_con.promise().query(getQuery('free'), ['free']);
+        //     loadSiteList = fallback;
+        //     setNextStatus = 'free';
+        // }
 
 
 
@@ -225,7 +206,7 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
 
     }
 
-    res.json({ loadSiteList, currentStatus, setNextStatus, nextStartNum })
+    res.json({ premiumList, topList, freeList })
 })
 
 export { sitelistRouter }

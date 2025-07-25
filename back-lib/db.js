@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS site(
     icons VARCHAR(100),
     sum INT,
     payment_key VARCHAR(255) UNIQUE,
+    view_count INT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -58,6 +59,10 @@ CREATE TABLE IF NOT EXISTS site(
 ALTER TABLE site MODIFY COLUMN imgs TEXT NULL;
 ALTER TABLE site MODIFY COLUMN thumbnail VARCHAR(255) NULL;
 
+0724 수정!! viewcount 추가!!
+
+ALTER TABLE site ADD COLUMN view_count INT DEFAULT 0 AFTER payment_key;
+ALTER TABLE board_fee ADD COLUMN view_count INT DEFAULT 0 AFTER content;
 
 -----------------
 
@@ -111,6 +116,7 @@ CREATE TABLE IF NOT EXISTS board_fee (
   imgs TEXT,
   subject VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,
+  view_count INT DEFAULT 0,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -151,7 +157,8 @@ CREATE TABLE qna (
 
 CREATE TABLE basic_env(
     base BOOLEAN DEFAULT TRUE,
-    banners TEXT
+    banners TEXT,
+    banner_links TEXT
 );
 
 CREATE TABLE today_count(

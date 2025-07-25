@@ -7,6 +7,25 @@ import moment from "moment-timezone";
 
 const apiRouter = express.Router();
 
+// 게시물들 조회수 올리기!!
+apiRouter.post('/raise_view_count', async (req, res, next) => {
+    console.log('일단 백 진입?');
+    const { table, idx } = req.body
+    console.log(table, idx);
+
+    try {
+        const getSiteViewCountQuery = `SELECT view_count FROM ${table} WHERE idx = ?`;
+        const [getSiteViewCount] = await sql_con.promise().query(getSiteViewCountQuery, [idx]);
+        const resCount = Number(getSiteViewCount[0]['view_count']) + 1
+        const updateViewCountQuery = `UPDATE ${table} SET view_count = ? WHERE idx = ?`;
+        await sql_con.promise().query(updateViewCountQuery, [resCount, idx]);
+
+    } catch (error) {
+
+    }
+
+    res.status(200).json({})
+})
 
 apiRouter.get('/load_main_count', async (req, res, next) => {
 
@@ -35,8 +54,6 @@ apiRouter.get('/load_main_count', async (req, res, next) => {
             baseEnv = getBaseEnv[0]
         }
 
-        console.log(baseEnv);
-        
     } catch (error) {
 
     }

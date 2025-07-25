@@ -46,7 +46,7 @@ admEtcRouter.post('/load_qna_list', async (req, res, next) => {
         if (loadQnaList.length > 0) {
             qnaList = loadQnaList
             console.log(qnaList);
-            
+
         }
     } catch (error) {
 
@@ -111,7 +111,7 @@ admEtcRouter.get('/load_basic_env', async (req, res, next) => {
 admEtcRouter.post('/upload_banners', async (req, res, next) => {
     console.log('진입 하지?');
 
-    const { bannerImgs } = req.body;
+    const { bannerImgs, bannerLinks } = req.body;
 
     try {
         let updateQuery = "";
@@ -119,11 +119,11 @@ admEtcRouter.post('/upload_banners', async (req, res, next) => {
         const [getBasicEnv] = await sql_con.promise().query(getBasicEnvQuery);
         // 있으면 update, 없으면 insert
         if (getBasicEnv.length > 0) {
-            updateQuery = "UPDATE basic_env SET banners = ? WHERE base = TRUE";
+            updateQuery = "UPDATE basic_env SET banners = ?, banner_links = ? WHERE base = TRUE";
         } else {
-            updateQuery = "INSERT INTO basic_env (banners) VALUES (?)";
+            updateQuery = "INSERT INTO basic_env (banners, banner_links) VALUES (?,?)";
         }
-        await sql_con.promise().query(updateQuery, [bannerImgs]);
+        await sql_con.promise().query(updateQuery, [bannerImgs, bannerLinks]);
     } catch (error) {
         console.error(error.message);
     }
