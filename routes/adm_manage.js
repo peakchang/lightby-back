@@ -75,27 +75,30 @@ admManageRouter.post('/delete_job', async (req, res, next) => {
     const { idx, delImgs, delThumbnail } = req.body;
     try {
 
-        const delImgList = delImgs.split(',')
-        delImgList.push(delThumbnail)
+        if (delImgs) {
+            const delImgList = delImgs.split(',')
+            delImgList.push(delThumbnail)
 
-        for (let i = 0; i < delImgList.length; i++) {
-            const delPath = delImgList[i];
-            const storage = new Storage({
-                projectId: process.env.GCS_PROJECT,
-                keyFilename: process.env.GCS_KEY_FILE,
-            });
-            const bucketName = process.env.GCS_BUCKET_NAME;
-            const bucket = storage.bucket(bucketName);
-            try {
-                await bucket.file(delPath).delete()
-            } catch (error) {
-                console.error(error.message);
+            for (let i = 0; i < delImgList.length; i++) {
+                const delPath = delImgList[i];
+                const storage = new Storage({
+                    projectId: process.env.GCS_PROJECT,
+                    keyFilename: process.env.GCS_KEY_FILE,
+                });
+                const bucketName = process.env.GCS_BUCKET_NAME;
+                const bucket = storage.bucket(bucketName);
+                try {
+                    await bucket.file(delPath).delete()
+                } catch (error) {
+                    console.error(error.message);
+                }
             }
         }
 
+
         const deleteQuery = "DELETE FROM site WHERE idx = ?";
         await sql_con.promise().query(deleteQuery, [idx]);
-        
+
     } catch (err) {
         console.error(err.message);
     }
