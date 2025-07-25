@@ -95,10 +95,9 @@ admManageRouter.post('/delete_job', async (req, res, next) => {
 
         const deleteQuery = "DELETE FROM site WHERE idx = ?";
         await sql_con.promise().query(deleteQuery, [idx]);
-
-
-    } catch (error) {
-
+        
+    } catch (err) {
+        console.error(err.message);
     }
     res.json({})
 })
