@@ -7,26 +7,39 @@ const admUsersRouter = express.Router();
 
 
 admUsersRouter.post('/get_users', async (req, res, next) => {
-    const { page } = req.body;
-    const pageCount = 30
-    const startNum = (page - 1) * pageCount
+
 
     let userList = []
-    let allCount = 0
-    try {
 
-        const getUserCountQuery = "SELECT COUNT(*) AS allcount FROM users WHERE rate < 5";
+    const nowPage = req.body.nowPage || 1;
+    const searchVal = req.body.searchVal || "";
+    const searchType = req.body.searchType || "";
+
+    let allCount = 0;
+    let maxPage = 0;
+    let onePageCount = 15;
+
+    const startNum = (nowPage - 1) * onePageCount;
+
+    let searchStr = ""
+    if (searchVal && searchType) {
+        searchStr = ` ${searchType} LIKE "%${searchVal}%"`;
+    }
+
+    try {
+        const getUserCountQuery = `SELECT COUNT(*) AS allcount FROM users WHERE rate < 4 ${searchStr ? `AND ${searchStr}` : ""}`;
         const [getUserCount] = await sql_con.promise().query(getUserCountQuery);
         allCount = getUserCount[0]['allcount']
 
+        maxPage = Math.ceil(allCount / onePageCount);
 
-        const getUsersQuery = `SELECT * FROM users ORDER BY idx DESC LIMIT ${startNum}, ${pageCount}`
+        const getUsersQuery = `SELECT * FROM users ${searchStr ? `WHERE ${searchStr}` : ""} ORDER BY idx DESC LIMIT ${startNum}, ${onePageCount}`
         const [getUsers] = await sql_con.promise().query(getUsersQuery);
         userList = getUsers
-    } catch (error) {
-
+    } catch (err) {
+        console.error(err.message);
     }
-    res.json({ userList, allCount })
+    res.json({ userList, allCount, maxPage })
 })
 
 export { admUsersRouter }
