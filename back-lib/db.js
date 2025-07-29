@@ -66,7 +66,7 @@ ALTER TABLE board_fee ADD COLUMN view_count INT DEFAULT 0 AFTER content;
 
 0725 수정!!  추가!!
 ALTER TABLE site ADD COLUMN ad_start_date DATE AFTER view_count;
-
+ALTER TABLE site ADD COLUMN ad_end_date DATE AFTER ad_start_date;
 -----------------
 
 

@@ -7,6 +7,24 @@ const admManageRouter = express.Router();
 
 
 
+admManageRouter.post('/update_ad_date', async (req, res, next) => {
+    const { idx, ad_start_date, ad_end_date } = req.body;
+
+    console.log(idx);
+    console.log(ad_start_date);
+    console.log(ad_end_date);
+
+    try {
+        const updateAdDateQuery = "UPDATE site SET ad_start_date = ?, ad_end_date = ? WHERE idx = ?";
+        await sql_con.promise().query(updateAdDateQuery, [ad_start_date, ad_end_date, idx]);
+    } catch (err) {
+        console.error(err.message);
+    }
+
+    res.status(200).json({})
+
+})
+
 // 게시판 관련~~~
 
 admManageRouter.post('/delete_post', async (req, res, next) => {
@@ -108,29 +126,68 @@ admManageRouter.post('/delete_job', async (req, res, next) => {
 
 admManageRouter.post('/load_joboffer_list', async (req, res, next) => {
 
+    const nowPage = req.body.nowPage || 1;
+    const searchVal = req.body.searchVal || "";
+    const searchType = req.body.searchType || "";
+
+    let searchStr = ""
+    if (searchVal && searchType) {
+
+        if (searchType == 'subject') {
+            searchStr = `WHERE site.${searchType} LIKE "%${searchVal}%"`;
+        } else {
+            searchStr = `WHERE users.${searchType} LIKE "%${searchVal}%"`;
+        }
+
+    }
+
+    let allCount = 0;
+    let maxPage = 0;
+    let onePageCount = 15;
+
+    const startNum = (nowPage - 1) * onePageCount;
 
 
-    const { page } = req.body;
     let jobOfferList = [];
     try {
+
+        const getJobOfferCountQuery = `SELECT COUNT(*) AS job_count FROM site LEFT JOIN users ON site.user_id = users.idx ${searchStr}`
+
+        const [getJobOfferCount] = await sql_con.promise().query(getJobOfferCountQuery);
+        allCount = getJobOfferCount[0]['job_count'];
+
+        maxPage = Math.ceil(allCount / onePageCount);
+
         const loadJobofferListQuery = `SELECT
-        site.*,
-        users.idx AS user_idx,
-        users.id AS user_id,
-        users.nickname AS user_nickname,
-        users.name AS user_name
-        FROM site JOIN users ON site.user_id = users.idx ORDER BY site.idx DESC`;
+            site.*,
+            users.idx AS user_idx,
+            users.id AS user_id,
+            users.nickname AS user_nickname,
+            users.name AS user_name,
+            users.phone AS user_phone
+        FROM site
+        LEFT JOIN users ON site.user_id = users.idx
+        ${searchStr}
+        ORDER BY site.idx DESC LIMIT ${startNum}, ${onePageCount};
+        `;
         const [loadJobofferList] = await sql_con.promise().query(loadJobofferListQuery);
+
+        console.log(loadJobofferList.length);
+
+
         if (loadJobofferList.length > 0) {
             jobOfferList = loadJobofferList
         }
+
+        console.log(jobOfferList);
+        
 
 
     } catch (err) {
         console.error(err.message);
 
     }
-    res.json({ jobOfferList })
+    res.json({ jobOfferList, allCount, maxPage })
 })
 
 
