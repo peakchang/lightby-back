@@ -129,16 +129,23 @@ admManageRouter.post('/load_joboffer_list', async (req, res, next) => {
     const nowPage = req.body.nowPage || 1;
     const searchVal = req.body.searchVal || "";
     const searchType = req.body.searchType || "";
+    const product = req.body.product || "";
 
     let searchStr = ""
     if (searchVal && searchType) {
-
         if (searchType == 'subject') {
             searchStr = `WHERE site.${searchType} LIKE "%${searchVal}%"`;
         } else {
             searchStr = `WHERE users.${searchType} LIKE "%${searchVal}%"`;
         }
+    }
 
+    if(product && product != 'all'){
+        if(!searchStr){
+            searchStr = `WHERE product = '${product}'`
+        }else{
+            searchStr = `AND product = '${product}'`
+        }
     }
 
     let allCount = 0;
