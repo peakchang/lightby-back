@@ -78,6 +78,22 @@ registRouter.post('/update', async (req, res, next) => {
     res.json({})
 })
 
+
+
+registRouter.post('/load_user_info', async (req, res, next) => {
+    const { userId } = req.body;
+    let userInfo = {}
+
+    try {
+        const loadSimpleUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
+        const [loadSimpleUserInfo] = await sql_con.promise().query(loadSimpleUserInfoQuery, [userId]);
+        userInfo = loadSimpleUserInfo[0]
+    } catch (error) {
+
+    }
+    res.json({ userInfo })
+})
+
 registRouter.post('/load_modify_content', async (req, res, next) => {
     const { userId, modifyIdx } = req.body;
 
