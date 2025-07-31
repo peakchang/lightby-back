@@ -6,6 +6,21 @@ import { Storage } from "@google-cloud/storage";
 const admUsersRouter = express.Router();
 
 
+admUsersRouter.post('/delete_user', async (req, res, next) => {
+    const { userId } = req.body
+
+    console.log(userId);
+    
+    try {
+        const deleteUserQuery = "DELETE FROM users WHERE idx = ?";
+        await sql_con.promise().query(deleteUserQuery, [userId]);
+    } catch (error) {
+
+    }
+
+    res.status(200).json({})
+})
+
 admUsersRouter.post('/get_users', async (req, res, next) => {
 
 
