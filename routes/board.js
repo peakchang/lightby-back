@@ -136,6 +136,7 @@ boardRouter.post('/upload_reply', async (req, res, next) => {
 
 boardRouter.post('/load_item', async (req, res, next) => {
     let postItem = {};
+    let pageUserInfo = {};
     let replyList = [];
     let likeCount = 0
     let { postIdx } = req.body

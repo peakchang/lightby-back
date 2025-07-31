@@ -3,9 +3,17 @@ import { sql_con } from "../back-lib/db.js";
 import bcrypt from 'bcrypt';
 import { Storage } from "@google-cloud/storage";
 import moment from "moment-timezone";
+import aligoapi from "aligoapi"
 // import cookieParser from "cookie-parser";
 
 const apiRouter = express.Router();
+
+
+
+
+apiRouter.post('/send_sms', async (req, res, next) => {
+    res.json({})
+})
 
 // 게시물들 조회수 올리기!!
 apiRouter.post('/raise_view_count', async (req, res, next) => {
