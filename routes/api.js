@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import { Storage } from "@google-cloud/storage";
 import moment from "moment-timezone";
 import aligoapi from "aligoapi"
+
 // import cookieParser from "cookie-parser";
 
 const apiRouter = express.Router();
@@ -12,7 +13,33 @@ const apiRouter = express.Router();
 
 
 apiRouter.post('/send_sms', async (req, res, next) => {
-    res.json({})
+
+    const { phone, message } = req.body;
+
+    try {
+        const AuthData = {
+            key: process.env.ALIGO_SMS_KEY,
+            // 이곳에 발급받으신 api key를 입력하세요
+            userid: process.env.ALIGO_USER_ID,
+            // 이곳에 userid를 입력하세요
+        }
+        req.body = {
+            sender: '010-3124-1105',
+            receiver: phone, // 수신자 번호
+            msg: message, // 문자 메시지 내용
+            msg_type: 'SMS', // 메시지 타입 (SMS, LMS, MMS)
+        }
+
+        const result = await aligoapi.send(req, AuthData)
+        console.log(result);
+
+    } catch (err) {
+        console.error(err.message);
+    }
+
+
+
+    res.status(200).json({})
 })
 
 // 게시물들 조회수 올리기!!
