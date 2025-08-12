@@ -128,11 +128,37 @@ boardRouter.post('/upload_reply', async (req, res, next) => {
     } catch (error) {
 
     }
-
-
-
     res.json({})
 })
+
+boardRouter.post('/update_reply', async (req, res, next) => {
+    const { bo_id, replyContent } = req.body
+    
+    console.log('댓글 업데이투ㄹ우으으으으으!!!!!');
+    
+    try {
+        const replyUpdateQuery = "UPDATE reply SET content = ? WHERE idx = ?";
+        await sql_con.promise().query(replyUpdateQuery, [replyContent, bo_id]);
+    } catch (err) {
+        console.error(err.message);
+    }
+    res.json({})
+})
+
+boardRouter.post('/delete_reply', async (req, res, next) => {
+    const { bo_id } = req.body
+    
+    console.log('댓글 삭제욤~~~~~~~~~~~~~~~');
+    
+    try {
+        const deleteReplyQuery = "DELETE FROM reply WHERE idx = ?";
+        await sql_con.promise().query(deleteReplyQuery, [bo_id]);
+    } catch (err) {
+        console.error(err.message);
+    }
+    res.json({})
+})
+
 
 boardRouter.post('/load_item', async (req, res, next) => {
     let postItem = {};
