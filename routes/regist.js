@@ -61,8 +61,11 @@ registRouter.post('/update', async (req, res, next) => {
 
     const { allData } = req.body;
 
+    console.log(allData);
+
+
     const itemIdx = allData.idx;
-    ['idx', 'sum', 'product', 'created_at', 'updated_at'].forEach(key => delete allData[key]);
+    ['idx', 'sum', 'product', 'created_at', 'updated_at', 'ad_start_date', 'ad_end_date'].forEach(key => delete allData[key]);
 
     const queryStr = getQueryStr(allData, 'update', 'updated_at')
 
@@ -72,7 +75,7 @@ registRouter.post('/update', async (req, res, next) => {
         const updateQuery = `UPDATE site SET ${queryStr.str} WHERE idx = ?`
         await sql_con.promise().query(updateQuery, queryStr.values);
     } catch (error) {
-
+        console.error(error.message);
     }
 
     res.json({})

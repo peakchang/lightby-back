@@ -101,6 +101,15 @@ CREATE TABLE IF NOT EXISTS users(
     refresh_token TEXT
 );
 
+
+ALTER TABLE users ADD COLUMN age VARCHAR(10) AFTER nickname;
+ALTER TABLE users ADD COLUMN gender VARCHAR(10) AFTER nickname;
+ALTER TABLE users ADD COLUMN career TEXT AFTER nickname;
+ALTER TABLE users ADD COLUMN introduction TEXT AFTER nickname;
+
+
+
+
 ALTER TABLE users ADD COLUMN interest TEXT AFTER customer_key;
 
 ALTER TABLE users ADD COLUMN customer_key VARCHAR(100) UNIQUE AFTER profile_thumbnail;

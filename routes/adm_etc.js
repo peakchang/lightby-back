@@ -1,9 +1,86 @@
 import express from "express";
+import { getQueryStr, imageUpload } from "../back-lib/lib.js";
 import { sql_con } from "../back-lib/db.js";
 import bcrypt from 'bcrypt';
 import { Storage } from "@google-cloud/storage";
 
+
 const admEtcRouter = express.Router();
+
+
+// talent 부분!!
+
+admEtcRouter.post('/upload_talent_include_image', imageUpload.single('onimg'), async (req, res, next) => {
+    const body = req.body;
+
+    const saveUrl = req.file.filename;
+
+    console.log(body);
+    console.log(saveUrl);
+
+    const delPath = req.body.prev_img
+
+    if (delPath) {
+        const storage = new Storage({
+            projectId: process.env.GCS_PROJECT,
+            keyFilename: process.env.GCS_KEY_FILE,
+        });
+        const bucketName = process.env.GCS_BUCKET_NAME;
+        const bucket = storage.bucket(bucketName);
+        try {
+            await bucket.file(delPath).delete()
+        } catch (error) {
+            console.error(error.message);
+        }
+    }
+
+    try {
+        const updateTalentQuery = "UPDATE users SET profile_image = ?, name = ?, gender = ?, age = ?, career = ?, introduction = ? WHERE idx = ?";
+        await sql_con.promise().query(updateTalentQuery, [saveUrl, body.name, body.gender, body.age, body.career, body.introduction, body.idx]);
+    } catch (error) {
+        console.error(error.message);
+    }
+
+
+
+
+
+
+
+    res.json({})
+})
+
+admEtcRouter.post('/upload_talent_no_image', async (req, res, next) => {
+    const { name, gender, age, career, introduction, idx } = req.body;
+
+    console.log(req.body);
+
+
+    try {
+        const updateTalentQuery = "UPDATE users SET name = ?, gender = ?, age = ?, career = ?, introduction = ? WHERE idx = ?";
+        await sql_con.promise().query(updateTalentQuery, [name, gender, age, career, introduction, idx]);
+    } catch (error) {
+        console.error(error.message);
+    }
+
+    res.json({})
+})
+
+
+admEtcRouter.post('/get_talent', async (req, res, next) => {
+    const { userIdx } = req.body;
+    console.log(userIdx);
+    let userInfo = {}
+
+    try {
+        const getUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
+        const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [userIdx]);
+        userInfo = getUserInfo[0]
+    } catch (error) {
+
+    }
+    res.json({ userInfo })
+})
 
 
 // FAQ / QnA 부분!!
