@@ -167,6 +167,20 @@ registRouter.post('/upload', async (req, res, next) => {
     let allData = req.body.allData;
     const THUMB_SIZE = { w: 144, h: 112 };
 
+    console.log(allData);
+
+    const orderId = allData.order_id;
+    const paymentKey = allData.payment_key;
+    const amount = allData.sum;
+
+    console.log(`paymentKey : ${paymentKey}`);
+    console.log(`orderId : ${orderId}`);
+    console.log(`amount : ${amount}`);
+
+    delete allData.order_id;
+
+
+
 
     try {
         // 썸네일 만들어서 저장!
@@ -210,14 +224,49 @@ registRouter.post('/upload', async (req, res, next) => {
     try {
         const queryStr = getQueryStr(allData, 'insert', 'created_at')
         const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
-
         await sql_con.promise().query(siteInsertQuery, queryStr.values);
     } catch (err) {
         console.error(err.message);
         return res.status(400).json({ message: '업로드 실패! 다시 시도 해주세요!' })
     }
 
-    return res.json({})
+    if (paymentKey && orderId) {
+        const widgetSecretKey = process.env.TOSS_SECRET_KEY;
+        const encryptedSecretKey =
+            "Basic " + Buffer.from(widgetSecretKey + ":").toString("base64");
+
+        try {
+            const response = await axios.post(
+                "https://api.tosspayments.com/v1/payments/confirm",
+                {
+                    orderId: orderId,
+                    amount: amount,
+                    paymentKey: paymentKey,
+                },
+                {
+                    headers: {
+                        Authorization: encryptedSecretKey,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            // 결제 성공 비즈니스 로직
+            console.log(response.data);
+            return res.status(response.status).json(response.data);
+        } catch (error) {
+            // 결제 실패 비즈니스 로직
+            console.error(error.response?.data || error.message);
+            return res
+                .status(error.response?.status || 500)
+                .json(error.response?.data || { message: "결제 승인 실패" });
+        }
+    } else {
+        return res.status(200).json({});
+    }
+
+
+
 
 })
 

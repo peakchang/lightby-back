@@ -6,11 +6,28 @@ import { Storage } from "@google-cloud/storage";
 const admUsersRouter = express.Router();
 
 
+admUsersRouter.post('/update_rate_user', async (req, res, next) => {
+    const { user_info } = req.body;
+    console.log(user_info);
+    console.log(user_info.idx);
+    console.log(user_info.rate);
+
+    try {
+        const userRateUpdateQuery = "UPDATE users SET rate = ? WHERE idx = ?";
+        await sql_con.promise().query(userRateUpdateQuery, [user_info.rate, user_info.idx]);
+    } catch (error) {
+        
+    }
+
+    res.json({})
+})
+
+
 admUsersRouter.post('/delete_user', async (req, res, next) => {
     const { userId } = req.body
 
     console.log(userId);
-    
+
     try {
         const deleteUserQuery = "DELETE FROM users WHERE idx = ?";
         await sql_con.promise().query(deleteUserQuery, [userId]);
