@@ -221,14 +221,7 @@ registRouter.post('/upload', async (req, res, next) => {
         console.error(err.message);
 
     }
-    try {
-        const queryStr = getQueryStr(allData, 'insert', 'created_at')
-        const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
-        await sql_con.promise().query(siteInsertQuery, queryStr.values);
-    } catch (err) {
-        console.error(err.message);
-        return res.status(400).json({ message: '업로드 실패! 다시 시도 해주세요!' })
-    }
+
 
     if (paymentKey && orderId) {
         const widgetSecretKey = process.env.TOSS_SECRET_KEY;
@@ -253,6 +246,11 @@ registRouter.post('/upload', async (req, res, next) => {
 
             // 결제 성공 비즈니스 로직
             console.log(response.data);
+
+            const queryStr = getQueryStr(allData, 'insert', 'created_at')
+            const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
+            await sql_con.promise().query(siteInsertQuery, queryStr.values);
+
             return res.status(response.status).json(response.data);
         } catch (error) {
             // 결제 실패 비즈니스 로직

@@ -8,6 +8,21 @@ import { Storage } from "@google-cloud/storage";
 const admEtcRouter = express.Router();
 
 
+// info 부분!!
+
+admEtcRouter.post('/load_visit_list', imageUpload.single('onimg'), async (req, res, next) => {
+    console.log('들어와?!?!?');
+    let visit_list = [];
+    try {
+        const loadVisitListQuery = "SELECT * FROM today_count ORDER BY idx DESC";
+        const [loadVisitList] = await sql_con.promise().query(loadVisitListQuery);
+        visit_list = loadVisitList
+    } catch (error) {
+
+    }
+    res.json({ visit_list })
+})
+
 // talent 부분!!
 
 admEtcRouter.post('/upload_talent_include_image', imageUpload.single('onimg'), async (req, res, next) => {
