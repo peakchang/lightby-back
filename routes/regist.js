@@ -164,10 +164,10 @@ registRouter.post('/get_post_count', async (req, res, next) => {
 
 registRouter.post('/upload', async (req, res, next) => {
 
-    console.log('업로드는 들어오지?!?!??!');
 
 
     let allData = req.body.allData;
+    const freebies = req.body.freebies;
     const THUMB_SIZE = { w: 144, h: 112 };
 
     console.log(allData);
@@ -179,6 +179,8 @@ registRouter.post('/upload', async (req, res, next) => {
     console.log(`paymentKey : ${paymentKey}`);
     console.log(`orderId : ${orderId}`);
     console.log(`amount : ${amount}`);
+    console.log(`freebies : ${freebies}`);
+    
 
     delete allData.order_id;
 
@@ -249,9 +251,14 @@ registRouter.post('/upload', async (req, res, next) => {
             // 결제 성공 비즈니스 로직
             console.log(response.data);
 
-            const queryStr = getQueryStr(allData, 'insert', 'created_at')
-            const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
-            await sql_con.promise().query(siteInsertQuery, queryStr.values);
+            try {
+                const queryStr = getQueryStr(allData, 'insert', 'created_at')
+                const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
+                await sql_con.promise().query(siteInsertQuery, queryStr.values);
+            } catch (error) {
+                return res.status(200).json({ message: '업로드 실패! 관리자에게 문의 해 주세요!' });
+            }
+
 
             return res.status(response.status).json(response.data);
         } catch (error) {
@@ -263,11 +270,22 @@ registRouter.post('/upload', async (req, res, next) => {
         }
     } else {
 
-        const queryStr = getQueryStr(allData, 'insert', 'created_at')
-        const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
-        await sql_con.promise().query(siteInsertQuery, queryStr.values);
-        
-        return res.status(200).json({});
+        try {
+            const queryStr = getQueryStr(allData, 'insert', 'created_at')
+            const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
+            await sql_con.promise().query(siteInsertQuery, queryStr.values);
+
+            console.log(allData.product);
+            
+            if(allData.product != 'free' && freebies){
+                console.log('프리비즈 차감 들어옴!!!');
+                const updateUserFreebiesQuery = "UPDATE users SET freebies = FALSE WHERE idx = ?";
+                await sql_con.promise().query(updateUserFreebiesQuery, [allData.user_id]);
+            }
+            return res.status(200).json({});
+        } catch (error) {
+            return res.status(200).json({ message: '업로드 실패! 관리자에서 문의 해 주세요!' });
+        }
     }
 
 

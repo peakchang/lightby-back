@@ -107,6 +107,8 @@ ALTER TABLE users ADD COLUMN gender VARCHAR(10) AFTER nickname;
 ALTER TABLE users ADD COLUMN career TEXT AFTER nickname;
 ALTER TABLE users ADD COLUMN introduction TEXT AFTER nickname;
 
+ALTER TABLE users ADD COLUMN freebies BOOLEAN DEFAULT TRUE AFTER introduction;
+
 
 
 
