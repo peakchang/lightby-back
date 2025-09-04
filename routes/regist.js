@@ -164,6 +164,9 @@ registRouter.post('/get_post_count', async (req, res, next) => {
 
 registRouter.post('/upload', async (req, res, next) => {
 
+    console.log('업로드는 들어오지?!?!??!');
+
+
     let allData = req.body.allData;
     const THUMB_SIZE = { w: 144, h: 112 };
 
@@ -219,7 +222,6 @@ registRouter.post('/upload', async (req, res, next) => {
 
     } catch (err) {
         console.error(err.message);
-
     }
 
 
@@ -260,6 +262,11 @@ registRouter.post('/upload', async (req, res, next) => {
                 .json(error.response?.data || { message: "결제 승인 실패" });
         }
     } else {
+
+        const queryStr = getQueryStr(allData, 'insert', 'created_at')
+        const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
+        await sql_con.promise().query(siteInsertQuery, queryStr.values);
+        
         return res.status(200).json({});
     }
 
