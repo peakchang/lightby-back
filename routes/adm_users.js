@@ -6,6 +6,22 @@ import { Storage } from "@google-cloud/storage";
 const admUsersRouter = express.Router();
 
 
+admUsersRouter.post('/get_counter', async (req, res, next) => {
+
+    const { start, end } = req.body;
+
+
+    let countList = [];
+    try {
+        const getCountListQuery = "SELECT * FROM today_count WHERE date BETWEEN '2025-09-01' AND '2025-09-19' ORDER BY idx DESC"
+        const [getCountList] = await sql_con.promise().query(getCountListQuery);
+        countList = getCountList
+    } catch (error) {
+
+    }
+    res.json({ countList })
+})
+
 admUsersRouter.post('/update_rate_user', async (req, res, next) => {
     const { user_info } = req.body;
     console.log(user_info);
@@ -16,7 +32,7 @@ admUsersRouter.post('/update_rate_user', async (req, res, next) => {
         const userRateUpdateQuery = "UPDATE users SET rate = ? WHERE idx = ?";
         await sql_con.promise().query(userRateUpdateQuery, [user_info.rate, user_info.idx]);
     } catch (error) {
-        
+
     }
 
     res.json({})
