@@ -8,6 +8,8 @@ const app = express();
 
 dotenv.config();
 
+import { authRouter } from './routes/auth.js';
+
 import { apiRouter } from './routes/api.js'
 import { imgRouter } from './routes/img.js';
 
@@ -53,6 +55,9 @@ app.use(cors(corsOptions));
 
 
 app.use('/api/v9/', apiRouter);
+
+app.use('/api/v9/auth', authRouter);
+
 app.use('/api/v9/img', imgRouter);
 app.use('/api/v9/regist', registRouter);
 app.use('/api/v9/sitelist', sitelistRouter);
@@ -71,7 +76,7 @@ app.use('/api/v9/adm_users', admUsersRouter);
 
 
 app.get('/chkserver', (req, res) => {
-    
+
     res.send('서버 생성 완료!!!!')
 })
 
