@@ -44,10 +44,14 @@ app.use(express.static('public', { ignore: ['favicon.ico'] }));
 // app.use('/img', express.static(path.join(__dirname, 'uploads/img')));
 // app.use('/profile', express.static(path.join(__dirname, 'uploads/profile')));
 
+const allowedOrigins = [
+    "https://lightby.co.kr",
+    "https://www.lightby.co.kr",
+];
 
 let corsOptions = {
     // 여기는 svelte (프론트엔드) 가 돌아가는 주소
-    origin: true,
+    origin: allowedOrigins,
     // optionsSuccessStatus: 200,
     credentials: true
 }
