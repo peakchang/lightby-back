@@ -51,7 +51,7 @@ const allowedOrigins = [
 
 let corsOptions = {
     // 여기는 svelte (프론트엔드) 가 돌아가는 주소
-    origin: allowedOrigins,
+    origin: true,
     // optionsSuccessStatus: 200,
     credentials: true
 }
