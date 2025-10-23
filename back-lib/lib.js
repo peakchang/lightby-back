@@ -112,3 +112,12 @@ export const getQueryStr = (data, type, addTimeStr = '') => {
     return returnData;
 }
 
+
+// 랜덤 값 구하기! (isInteger 가 true 면 정수 / false면 실수 (0.0))
+export function getRandomBetween(min, max, isInteger = true) {
+    if (isInteger) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    } else {
+        return Math.random() * (max - min) + min;
+    }
+}

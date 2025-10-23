@@ -4,14 +4,61 @@ import bcrypt from 'bcrypt';
 import { Storage } from "@google-cloud/storage";
 import moment from "moment-timezone";
 import aligoapi from "aligoapi"
+import { getRandomBetween } from '../back-lib/lib.js';
 
 // import cookieParser from "cookie-parser";
 
 const apiRouter = express.Router();
 
 
+apiRouter.get('/update_count', async (req, res, next) => {
+    console.log('update_fake_count');
+
+    const today = moment().format('YYYY-MM-DD')
+    const random = getRandomBetween(5, 8)
+    try {
+        const chkTodayCountQuery = "SELECT * FROM today_count WHERE date = ?"
+        const [chkTodayCount] = await sql_con.promise().query(chkTodayCountQuery, [today]);
+
+        if (chkTodayCount.length > 0) {
+            const updateTodayCountQuery = "UPDATE today_count SET fake_count = ? WHERE date = ?";
+            await sql_con.promise().query(updateTodayCountQuery, [chkTodayCount[0]['fake_count'] + random, today]);
+        }
+    } catch (err) {
+        console.error(err.message);
+    }
+
+})
+
+apiRouter.get('/insert_n_update_count', async (req, res, next) => {
+
+    console.log('insert_n_update_count!!!!!!!!!!!!!!!');
+
+    const today = moment().format('YYYY-MM-DD')
+
+    try {
+        const chkTodayCountQuery = "SELECT * FROM today_count WHERE date = ?"
+        const [chkTodayCount] = await sql_con.promise().query(chkTodayCountQuery, [today]);
+
+        if (chkTodayCount.length == 0) {
+            const insertTodayCountQuery = "INSERT INTO today_count (date, fake_count, real_count) VALUES (?,?,?)";
+            await sql_con.promise().query(insertTodayCountQuery, [today, random, 1]);
+        } else {
+            const updateTodayCountQuery = "UPDATE today_count SET fake_count = ?, real_count = ? WHERE date = ?";
+            await sql_con.promise().query(updateTodayCountQuery, [chkTodayCount[0]['fake_count'] + random, chkTodayCount[0]['real_count'] + 1, today]);
+        }
+    } catch (err) {
+        console.error(err.message);
+    }
+
+    res.status(200).json({})
+
+})
 
 
+
+
+// 인증번호 발송
 apiRouter.post('/send_sms', async (req, res, next) => {
 
     const { phone, message } = req.body;
@@ -36,8 +83,6 @@ apiRouter.post('/send_sms', async (req, res, next) => {
     } catch (err) {
         console.error(err.message);
     }
-
-
 
     res.status(200).json({})
 })
