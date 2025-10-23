@@ -27,7 +27,7 @@ apiRouter.get('/update_count', async (req, res, next) => {
     } catch (err) {
         console.error(err.message);
     }
-
+    res.status(200).json({})
 })
 
 apiRouter.get('/insert_n_update_count', async (req, res, next) => {
