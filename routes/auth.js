@@ -12,6 +12,19 @@ import jwt from 'jsonwebtoken';
 const authRouter = express.Router();
 
 
+authRouter.post('/logout', async (req, res, next) => {
+
+    const { idx } = req.body;
+    
+    try {
+        const deleteTokenQuery = "UPDATE users SET refresh_token = '' WHERE idx = ?";
+        await sql_con.promise().query(deleteTokenQuery, [idx]);
+    } catch (error) {
+
+    }
+    res.status(200).json({})
+})
+
 authRouter.get('/kakao-callback', async (req, res, next) => {
     console.log('callback get!!!!');
 
