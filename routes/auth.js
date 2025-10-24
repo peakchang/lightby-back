@@ -12,6 +12,19 @@ import jwt from 'jsonwebtoken';
 const authRouter = express.Router();
 
 
+authRouter.get('/kakao-callback', async (req, res, next) => {
+    console.log('callback get!!!!');
+
+    res.json({})
+})
+
+authRouter.post('/kakao-callback', async (req, res, next) => {
+    console.log('callback post!!!!');
+
+    res.json({})
+})
+
+
 // 회원 가입시 아이디 / 닉네임 / 전화번호 중복 체크 부분
 authRouter.post('/duplicate_chk', async (req, res, next) => {
     const body = req.body;
@@ -262,7 +275,7 @@ authRouter.post('/kakao_token_update', async (req, res, next) => {
 
         const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
         await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, idx]);
-        return res.json({  })
+        return res.json({})
     } catch (error) {
         return res.status(400).json({})
     }
