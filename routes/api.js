@@ -35,7 +35,7 @@ apiRouter.get('/insert_n_update_count', async (req, res, next) => {
     console.log('insert_n_update_count!!!!!!!!!!!!!!!');
 
     const today = moment().format('YYYY-MM-DD')
-
+    const random = getRandomBetween(5, 8)
     try {
         const chkTodayCountQuery = "SELECT * FROM today_count WHERE date = ?"
         const [chkTodayCount] = await sql_con.promise().query(chkTodayCountQuery, [today]);
