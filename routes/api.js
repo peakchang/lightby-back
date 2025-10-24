@@ -15,14 +15,13 @@ apiRouter.get('/update_app_count', async (req, res, next) => {
     console.log('update_fake_count');
 
     const today = moment().format('YYYY-MM-DD')
-    const random = getRandomBetween(5, 8)
     try {
         const chkTodayCountQuery = "SELECT * FROM today_count WHERE date = ?"
         const [chkTodayCount] = await sql_con.promise().query(chkTodayCountQuery, [today]);
 
         if (chkTodayCount.length > 0) {
             const updateTodayCountQuery = "UPDATE today_count SET app_all_count = ? WHERE date = ?";
-            await sql_con.promise().query(updateTodayCountQuery, [chkTodayCount[0]['app_all_count'] + random, today]);
+            await sql_con.promise().query(updateTodayCountQuery, [chkTodayCount[0]['app_all_count'] + 1, today]);
         }
     } catch (err) {
         console.error(err.message);
@@ -37,7 +36,6 @@ apiRouter.get('/insert_n_update_app_count', async (req, res, next) => {
     console.log('insert_n_update_app_count!!!!!!!!!!!!!!!');
 
     const today = moment().format('YYYY-MM-DD')
-    const random = getRandomBetween(5, 8)
     try {
         const chkTodayCountQuery = "SELECT * FROM today_count WHERE date = ?"
         const [chkTodayCount] = await sql_con.promise().query(chkTodayCountQuery, [today]);
@@ -47,7 +45,7 @@ apiRouter.get('/insert_n_update_app_count', async (req, res, next) => {
             await sql_con.promise().query(insertTodayCountQuery, [today, 1, 1]);
         } else {
             const updateTodayCountQuery = "UPDATE today_count SET app_count = ?, app_all_count = ? WHERE date = ?";
-            await sql_con.promise().query(updateTodayCountQuery, [chkTodayCount[0]['app_count'] + random, chkTodayCount[0]['app_all_count'] + 1, today]);
+            await sql_con.promise().query(updateTodayCountQuery, [chkTodayCount[0]['app_count'] + 1, chkTodayCount[0]['app_all_count'] + 1, today]);
         }
     } catch (err) {
         console.error(err.message);
