@@ -179,7 +179,14 @@ CREATE TABLE today_count(
     idx INT AUTO_INCREMENT PRIMARY KEY,
     date DATE NOT NULL,
     fake_count INT,
-    real_count INT
+    real_count INT,
 );
+
+
+ALTER TABLE today_count DROP COLUMN app_all_count;
+
+
+ALTER TABLE today_count ADD COLUMN app_count INT DEFAULT 0 AFTER real_count;
+ALTER TABLE today_count ADD COLUMN app_all_count INT DEFAULT 0 AFTER app_count;
 
 */
