@@ -12,10 +12,54 @@ import jwt from 'jsonwebtoken';
 const authRouter = express.Router();
 
 
+authRouter.post('/app_login', async (req, res, next) => {
+
+    console.log('아이디 체크 들어옴!!');
+
+    const { id } = req.body;
+    console.log(id);
+
+    let userInfo = {}
+    try {
+        const getUserInfoQuery = "SELECT * FROM users WHERE id = ?";
+        const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [id]);
+        if (getUserInfo.length === 0) {
+            return res.status(400).json({ message: '아이디가 존재하지 않습니다.' })
+        }
+        userInfo = getUserInfo[0]
+
+        const isMatch = await bcrypt.compare(password, userInfo.password);
+
+        // 비밀번호 인증 통과시
+        if (isMatch) {
+
+            // 토큰 생성
+            const accessToken = jwt.sign(accessPayload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+            const refreshToken = jwt.sign(refreshPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
+
+            const now = moment().format('YYYY-MM-DD HH:mm:ss')
+
+            // DB에 토큰 저장
+            const refreshTokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
+            await sql_con.promise().query(refreshTokenUpdateQuery, [refreshToken, now, idx]);
+
+            return res.json({ userInfo, accessToken, refreshToken })
+        } else {
+            return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' })
+        }
+    } catch (error) {
+        return res.status(400).json({ message: '에러가 발생 했습니다.' })
+    }
+})
+
+
+
+
+
 authRouter.post('/logout', async (req, res, next) => {
 
     const { idx } = req.body;
-    
+
     try {
         const deleteTokenQuery = "UPDATE users SET refresh_token = '' WHERE idx = ?";
         await sql_con.promise().query(deleteTokenQuery, [idx]);
@@ -154,6 +198,11 @@ authRouter.post('/login', async (req, res, next) => {
 //     console.log(req.cookies);
 //     res.json({})
 // })
+
+
+
+
+
 
 
 authRouter.post('/login_idchk', async (req, res, next) => {
