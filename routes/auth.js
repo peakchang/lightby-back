@@ -11,13 +11,53 @@ import jwt from 'jsonwebtoken';
 
 const authRouter = express.Router();
 
+authRouter.post('/access_hook_chk_app', async (req, res, next) => {
+
+    let userInfo = {}
+    try {
+        const authHeader = req.headers.authorization; // 또는 req.get('Authorization')
+        const token = authHeader && authHeader.startsWith('Bearer ')
+            ? authHeader.slice(7)
+            : null;
+
+        const userInfo = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+        return res.status(200).json({ userInfo })
+    } catch (error) {
+        console.error(error.message);
+
+        return res.status(400)
+    }
+
+    res.json({})
+})
+
+authRouter.post('/refresh_hook_chk_app', async (req, res, next) => {
+
+    let userInfo = {}
+    try {
+        const authHeader = req.headers.authorization; // 또는 req.get('Authorization')
+        const token = authHeader && authHeader.startsWith('Bearer ')
+            ? authHeader.slice(7)
+            : null;
+
+        const payload = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+        const getUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
+        const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [payload.userId]);
+        userInfo = getUserInfo[0]
+
+        const newAccessToken = jwt.sign({ userId: userInfo.idx, rate: userInfo.rate }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+
+        return res.status(200).json({ userInfo, newAccessToken })
+    } catch (error) {
+        return res.status(400)
+    }
+})
+
 
 authRouter.post('/app_login', async (req, res, next) => {
 
-    console.log('아이디 체크 들어옴!!');
-
-    const { id } = req.body;
-    console.log(id);
+    const { id, password } = req.body;
 
     let userInfo = {}
     try {
@@ -33,6 +73,15 @@ authRouter.post('/app_login', async (req, res, next) => {
         // 비밀번호 인증 통과시
         if (isMatch) {
 
+            const accessPayload = {
+                userId: userInfo.idx,
+                rate: userInfo.rate
+            }
+
+            const refreshPayload = {
+                userId: userInfo.idx
+            }
+
             // 토큰 생성
             const accessToken = jwt.sign(accessPayload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
             const refreshToken = jwt.sign(refreshPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
@@ -41,13 +90,15 @@ authRouter.post('/app_login', async (req, res, next) => {
 
             // DB에 토큰 저장
             const refreshTokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
-            await sql_con.promise().query(refreshTokenUpdateQuery, [refreshToken, now, idx]);
+            await sql_con.promise().query(refreshTokenUpdateQuery, [refreshToken, now, userInfo.idx]);
 
             return res.json({ userInfo, accessToken, refreshToken })
         } else {
             return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' })
         }
     } catch (error) {
+        console.error(error.message);
+
         return res.status(400).json({ message: '에러가 발생 했습니다.' })
     }
 })
@@ -69,17 +120,7 @@ authRouter.post('/logout', async (req, res, next) => {
     res.status(200).json({})
 })
 
-authRouter.get('/kakao-callback', async (req, res, next) => {
-    console.log('callback get!!!!');
 
-    res.json({})
-})
-
-authRouter.post('/kakao-callback', async (req, res, next) => {
-    console.log('callback post!!!!');
-
-    res.json({})
-})
 
 
 // 회원 가입시 아이디 / 닉네임 / 전화번호 중복 체크 부분
@@ -120,8 +161,6 @@ authRouter.post('/join', async (req, res, next) => {
 
 // 로그인 부분
 authRouter.post('/login', async (req, res, next) => {
-
-    console.log('로그인 들어옴?!!');
 
     const body = req.body
 
@@ -191,13 +230,6 @@ authRouter.post('/login', async (req, res, next) => {
 })
 
 
-// authRouter.post('/hook_user_info', async (req, res, next) => {
-
-//     console.log('훅 처리 들어옴!!');
-
-//     console.log(req.cookies);
-//     res.json({})
-// })
 
 
 
@@ -207,10 +239,7 @@ authRouter.post('/login', async (req, res, next) => {
 
 authRouter.post('/login_idchk', async (req, res, next) => {
 
-    console.log('아이디 체크 들어옴!!');
-
     const { id } = req.body;
-    console.log(id);
 
     let userInfo = {}
     try {
@@ -228,11 +257,9 @@ authRouter.post('/login_idchk', async (req, res, next) => {
 
 authRouter.post('/token_update', async (req, res, next) => {
 
-    console.log('토큰 업데이트!!');
     const { refreshToken, idx } = req.body;
     const now = moment().format('YYYY-MM-DD HH:mm:ss')
-    console.log(refreshToken);
-    console.log(idx);
+
     try {
         const refreshTokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
         await sql_con.promise().query(refreshTokenUpdateQuery, [refreshToken, now, idx]);
@@ -243,11 +270,10 @@ authRouter.post('/token_update', async (req, res, next) => {
 })
 
 authRouter.post('/access_hook_chk', async (req, res, next) => {
-    console.log('액세스 토큰 체크 들어옴!!');
+
     const { accessToken } = req.body;
     try {
         const payload = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
-        console.log(payload);
         return res.status(200).json({ userId: payload.userId, rate: payload.rate })
     } catch (error) {
         console.error(error.message);
@@ -262,8 +288,6 @@ authRouter.post('/refresh_hook_chk', async (req, res, next) => {
 
         const getUserInfoQuery = "SELECT * FROM users WHERE idx = ? AND refresh_token = ?";
         const [userInfoRow] = await sql_con.promise().query(getUserInfoQuery, [idx, refreshToken]);
-
-        console.log(userInfoRow);
 
         if (userInfoRow.length > 0) {
             const now = moment().format('YYYY-MM-DD HH:mm:ss')
@@ -307,15 +331,10 @@ authRouter.post('/kakao_nickname_duplicatechk', async (req, res, next) => {
 
 authRouter.post('/kakao_join', async (req, res, next) => {
     const { query_str, query_question, query_values } = req.body;
-    console.log(query_str);
-    console.log(query_question);
-    console.log(query_values);
 
     try {
         const insertSnsUserQuery = `INSERT INTO users (${query_str}) VALUES (${query_question})`;
         const [result] = await sql_con.promise().query(insertSnsUserQuery, query_values);
-
-        console.log(result);
 
         res.json({ insertId: result.insertId })
     } catch (error) {
@@ -327,12 +346,6 @@ authRouter.post('/kakao_join', async (req, res, next) => {
 authRouter.post('/kakao_token_update', async (req, res, next) => {
     const { refreshToken, idx } = req.body;
     try {
-
-        console.log('토큰 업데이트!!!!!!!!!!!!!!!!!!!');
-
-        console.log(refreshToken);
-        console.log(idx);
-
         const now = moment().format('YYYY-MM-DD HH:mm:ss')
 
         const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
