@@ -31,11 +31,18 @@ authRouter.post('/kakao_join_app', async (req, res) => {
         accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
         refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
 
+        console.log(accessToken);
+        console.log(refreshToken);
+        
+        
+
 
         const now = moment().format('YYYY-MM-DD HH:mm:ss')
         const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
         const [insertInfo] = await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, result.insertId]);
 
+        console.log(insertInfo);
+        
     } catch (err) {
         console.error(err.message);
     }
