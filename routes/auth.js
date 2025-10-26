@@ -15,7 +15,10 @@ const authRouter = express.Router();
 
 authRouter.post('/kakao_app_callback', async (req, res) => {
 
-    console.log('앱 콜백 들어왔음!!!!');
+    let data = {
+        loginStatus: undefined,
+        userInfo: {},
+    }
 
     try {
         const code = String(req.body.code || '');
@@ -30,9 +33,9 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
         console.log(`KAKAO_RESTAPI - ${process.env.KAKAO_RESTAPI}`);
         console.log(`KAKAO_APP_REDIRECT - ${process.env.KAKAO_APP_REDIRECT}`);
-        
-        
-        
+
+
+
         // 1) code → 카카오 토큰 교환
         const params = new URLSearchParams();
         params.append('grant_type', 'authorization_code');
@@ -54,7 +57,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
         // 2) 카카오 유저 정보 얻기
         console.log("2) 카카오 유저 정보 얻기");
-        
+
         const meResp = await axios.get('https://kapi.kakao.com/v2/user/me', {
             headers: { Authorization: `Bearer ${kakaoAccess}` }
         });
@@ -63,16 +66,61 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
         console.log(kakaoUserInfo);
 
 
-        // const kakaoId = String(meResp.data.id);
-        // const email = meResp.data?.kakao_account?.email ?? null;
+        // 해당 유저 정보로 DB에 있는지 (기존 가입 유저인지) 체크
+        const getUserInfoQuery = "SELECT * FROM users WHERE sns_id = ?";
+        const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [kakaoUserInfo.id]);
 
-        // // 3) 우리 서비스 토큰 발급(예시; 실제로는 JWT 발급)
-        // const user = { id: `kakao:${kakaoId}`, email };
-        const accessToken = 'OUR_ACCESS_TOKEN';
-        const refreshToken = 'OUR_REFRESH_TOKEN';
-        const accessExpiresInSec = 15 * 60;
+        if (getUserInfo.length > 0) {
 
-        return res.json({ accessToken, refreshToken, accessExpiresInSec, user });
+            try {
+                // 기존 가입 유저면 액세스 토큰 / 리프레쉬 토큰 설정 하고 메인으로!
+
+                const userInfo = getUserInfo[0];
+                const accessPayload = {
+                    userId: userInfo.idx,
+                    rate: userInfo.rate
+                }
+
+                const refreshPayload = {
+                    userId: userInfo.idx
+                }
+
+                const accessToken = jwt.sign(accessPayload, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+                const refreshToken = jwt.sign(refreshPayload, REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
+
+                data.loginStatus = true;
+
+                const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
+                await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, userInfo.idx]);
+
+
+
+                return res.json({ accessToken, refreshToken, accessExpiresInSec, user });
+            } catch (error) {
+                console.error(error.message);
+            }
+        } else {
+            // 닉네임 중복 체크
+            const nickChkQuery = "SELECT * FROM users WHERE nickname = ?";
+            const [nickChk] = await sql_con.promise().query(nickChkQuery, [kakaoUserInfo.kakao_account.profile.nickname]);
+            if (nickChk.length == 0) {
+                data.userInfo.nickname = kakaoUserInfo.kakao_account.profile.nickname
+            }
+
+            // 기존 유저 아니면 아래 데이터들 체크! 모두 충족하면 넘어가기~
+            // 어쨌든 닉네임 때문에 다시 하긴 해야할거 같은데?
+            data.loginStatus = false;
+            data.userInfo.sns_id = kakaoUserInfo.id;
+            data.userInfo.profile_image = kakaoUserInfo.kakao_account.profile.profile_image_url
+            data.userInfo.profile_thumbnail = kakaoUserInfo.kakao_account.profile.thumbnail_image_url
+            data.userInfo.name = kakaoUserInfo.kakao_account.profile.nickname
+
+            data.userInfo.phone = undefined
+            // data.userInfo.phone = kakaoUserInfo.properties.phone // 휴대폰 부분은 넘어온게 없으니까 추후 확인
+
+            // name / nickname / phone 다 있으면 insert 시키고 없으면 바로 loginStatus = false 하고 리턴 시키기!
+            // 다 있어도 닉네임 / 휴대폰 번호 중복이 있을수 있으니까 에러나면 (unique) loginStatus = false 하고 리턴 시키기!
+        }
     } catch (e) {
         console.error(e);
         return res.status(400).json({ message: 'kakao exchange failed' });
@@ -215,7 +263,7 @@ authRouter.post('/refresh_hook_chk_app', async (req, res, next) => {
 
         return res.status(200).json({ userInfo, newAccessToken })
     } catch (error) {
-        return res.status(400)
+        return res.status(400).json({})
     }
 })
 
