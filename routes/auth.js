@@ -25,6 +25,8 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
             console.log('코드가 없다!!');
             return res.status(400).json({ message: 'no code' });
         }
+
+        console.log("1) code → 카카오 토큰 교환");
         
         // 1) code → 카카오 토큰 교환
         const params = new URLSearchParams();
@@ -36,12 +38,18 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
             params.append('client_secret', process.env.KAKAO_RESTAPI);
         }
 
+        console.log("1.5)카카오 액세스 토큰 가져오기!");
+
         const tokenResp = await axios.post('https://kauth.kakao.com/oauth/token', params, {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
+
+
         const kakaoAccess = tokenResp.data.access_token;
 
-        // 2) 카카오 유저 정보
+        // 2) 카카오 유저 정보 얻기
+        console.log("2) 카카오 유저 정보 얻기");
+        
         const meResp = await axios.get('https://kapi.kakao.com/v2/user/me', {
             headers: { Authorization: `Bearer ${kakaoAccess}` }
         });
@@ -62,7 +70,6 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
         return res.json({ accessToken, refreshToken, accessExpiresInSec, user });
     } catch (e) {
         console.error(e.message);
-
         return res.status(400).json({ message: 'kakao exchange failed' });
     }
 });
