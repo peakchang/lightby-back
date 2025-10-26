@@ -73,7 +73,15 @@ authRouter.get('/kakao_app_bridge', async (req, res, next) => {
     const code = String(req.query.code || '');
     const state = String(req.query.state || '');
 
-    if (!code) return res.status(400).send('no code');
+
+    if (!code){
+        console.log('코드가 없어?!?!?!');
+        
+        return res.status(400).send('no code');
+    }
+
+    console.log(code);
+    
 
     const appUrl = `co.lightby.app://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
 
