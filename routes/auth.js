@@ -98,7 +98,10 @@ authRouter.get('/kakao_app_callback', async (req, res, next) => {
     </body>
     </html>`;
     // 일부 브라우저 302 커스텀스킴 차단 대비 JS 방식
-    res.set(html);
+    res
+        .status(200)
+        .set('Content-Type', 'text/html; charset=utf-8')
+        .send(html);
 });
 
 authRouter.post('/access_hook_chk_app', async (req, res, next) => {
