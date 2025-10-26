@@ -1,12 +1,13 @@
 import express from "express";
 import { sql_con } from "../back-lib/db.js";
 import bcrypt from 'bcrypt';
-import { Storage } from "@google-cloud/storage";
 import moment from "moment-timezone";
-import aligoapi from "aligoapi"
 import { getQueryStr } from "../back-lib/lib.js";
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
 
+// import aligoapi from "aligoapi"
+// import { Storage } from "@google-cloud/storage";
 // import cookieParser from "cookie-parser";
 
 const authRouter = express.Router();
@@ -24,7 +25,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
             console.log('코드가 없다!!');
             return res.status(400).json({ message: 'no code' });
         }
-
+        
         // 1) code → 카카오 토큰 교환
         const params = new URLSearchParams();
         params.append('grant_type', 'authorization_code');
@@ -73,15 +74,11 @@ authRouter.get('/kakao_app_bridge', async (req, res, next) => {
     const code = String(req.query.code || '');
     const state = String(req.query.state || '');
 
-
-    if (!code){
+    if (!code) {
         console.log('코드가 없어?!?!?!');
-        
         return res.status(400).send('no code');
     }
 
-    console.log(code);
-    
 
     const appUrl = `co.lightby.app://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
 
