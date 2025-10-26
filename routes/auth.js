@@ -71,33 +71,28 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
         const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [kakaoUserInfo.id]);
 
         if (getUserInfo.length > 0) {
-
-            try {
-                // 기존 가입 유저면 액세스 토큰 / 리프레쉬 토큰 설정 하고 메인으로!
-
-                const userInfo = getUserInfo[0];
-                const accessPayload = {
-                    userId: userInfo.idx,
-                    rate: userInfo.rate
-                }
-
-                const refreshPayload = {
-                    userId: userInfo.idx
-                }
-
-                const accessToken = jwt.sign(accessPayload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-                const refreshToken = jwt.sign(refreshPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
-
-                data.loginStatus = true;
-
-                const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
-                await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, userInfo.idx]);
-
-                return res.status(200).json({ accessToken, refreshToken, data });
-
-            } catch (error) {
-                console.error(error.message);
+            
+            const userInfo = getUserInfo[0];
+            const accessPayload = {
+                userId: userInfo.idx,
+                rate: userInfo.rate
             }
+
+            const refreshPayload = {
+                userId: userInfo.idx
+            }
+
+            const accessToken = jwt.sign(accessPayload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+            const refreshToken = jwt.sign(refreshPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
+
+            data.loginStatus = true;
+
+            const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
+            await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, userInfo.idx]);
+
+            return res.status(200).json({ accessToken, refreshToken, data });
+
+
         } else {
             // 닉네임 중복 체크
             const nickChkQuery = "SELECT * FROM users WHERE nickname = ?";
