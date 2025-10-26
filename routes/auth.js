@@ -45,9 +45,10 @@ authRouter.post('/kakao_join_app', async (req, res) => {
         
     } catch (err) {
         console.error(err.message);
+        return res.status(400).json({});
     }
 
-    return res.status(400).json({ userId, accessToken, refreshToken });
+    return res.status(200).json({ userId, accessToken, refreshToken });
 })
 
 authRouter.post('/kakao_app_callback', async (req, res) => {
