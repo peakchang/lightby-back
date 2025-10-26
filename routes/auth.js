@@ -234,15 +234,11 @@ authRouter.post('/access_hook_chk_app', async (req, res, next) => {
             : null;
 
         const userInfo = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-
         return res.status(200).json({ userInfo })
     } catch (error) {
         console.error(error.message);
-
-        return res.status(400)
+        return res.status(400).json({})
     }
-
-    res.json({})
 })
 
 authRouter.post('/refresh_hook_chk_app', async (req, res, next) => {
