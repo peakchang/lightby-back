@@ -93,9 +93,8 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
                 const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
                 await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, userInfo.idx]);
 
+                return res.status(200).json({ accessToken, refreshToken, data });
 
-
-                return res.json({ accessToken, refreshToken, user });
             } catch (error) {
                 console.error(error.message);
             }
@@ -120,6 +119,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
             // name / nickname / phone 다 있으면 insert 시키고 없으면 바로 loginStatus = false 하고 리턴 시키기!
             // 다 있어도 닉네임 / 휴대폰 번호 중복이 있을수 있으니까 에러나면 (unique) loginStatus = false 하고 리턴 시키기!
+            return res.status(200).json({ data });
         }
     } catch (e) {
         console.error(e);
