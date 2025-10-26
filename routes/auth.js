@@ -22,18 +22,17 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
         if (!code) {
             console.log('코드가 없다!!');
-
             return res.status(400).json({ message: 'no code' });
         }
 
         // 1) code → 카카오 토큰 교환
         const params = new URLSearchParams();
         params.append('grant_type', 'authorization_code');
-        params.append('client_id', process.env.KAKAO_CLIENT_ID); // REST API 키
+        params.append('client_id', process.env.KAKAO_RESTAPI); // REST API 키
         params.append('redirect_uri', 'https://api.lightby.co.kr/auth/kakao/bridge');
         params.append('code', code);
-        if (process.env.KAKAO_CLIENT_SECRET) {
-            params.append('client_secret', process.env.KAKAO_CLIENT_SECRET);
+        if (process.env.KAKAO_RESTAPI) {
+            params.append('client_secret', process.env.KAKAO_RESTAPI);
         }
 
         const tokenResp = await axios.post('https://kauth.kakao.com/oauth/token', params, {
@@ -61,6 +60,8 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
         return res.json({ accessToken, refreshToken, accessExpiresInSec, user });
     } catch (e) {
+        console.error(e.message);
+
         return res.status(400).json({ message: 'kakao exchange failed' });
     }
 });
