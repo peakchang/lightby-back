@@ -46,9 +46,9 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
         // // 3) 우리 서비스 토큰 발급(예시; 실제로는 JWT 발급)
         // const user = { id: `kakao:${kakaoId}`, email };
-        // const accessToken = 'OUR_ACCESS_TOKEN';
-        // const refreshToken = 'OUR_REFRESH_TOKEN';
-        // const accessExpiresInSec = 15 * 60;
+        const accessToken = 'OUR_ACCESS_TOKEN';
+        const refreshToken = 'OUR_REFRESH_TOKEN';
+        const accessExpiresInSec = 15 * 60;
 
         return res.json({ accessToken, refreshToken, accessExpiresInSec, user });
     } catch (e) {
