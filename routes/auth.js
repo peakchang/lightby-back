@@ -27,6 +27,11 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
         }
 
         console.log("1) code → 카카오 토큰 교환");
+
+        console.log(`KAKAO_RESTAPI - ${process.env.KAKAO_RESTAPI}`);
+        console.log(`KAKAO_APP_REDIRECT - ${process.env.KAKAO_APP_REDIRECT}`);
+        
+        
         
         // 1) code → 카카오 토큰 교환
         const params = new URLSearchParams();
@@ -69,7 +74,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
         return res.json({ accessToken, refreshToken, accessExpiresInSec, user });
     } catch (e) {
-        console.error(e.message);
+        console.error(e);
         return res.status(400).json({ message: 'kakao exchange failed' });
     }
 });
