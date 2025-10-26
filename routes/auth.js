@@ -32,7 +32,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
         const params = new URLSearchParams();
         params.append('grant_type', 'authorization_code');
         params.append('client_id', process.env.KAKAO_RESTAPI); // REST API 키
-        params.append('redirect_uri', 'https://api.lightby.co.kr/auth/kakao/bridge');
+        params.append('redirect_uri', process.env.KAKAO_APP_REDIRECT);
         params.append('code', code);
         if (process.env.KAKAO_RESTAPI) {
             params.append('client_secret', process.env.KAKAO_RESTAPI);
