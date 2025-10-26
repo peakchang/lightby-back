@@ -14,21 +14,91 @@ const authRouter = express.Router();
 authRouter.get('/kakao_app_callback', async (req, res, next) => {
 
     console.log('카카오 콜백 들어왔나?!?!?!?!?!?!');
-    
+
     const code = String(req.query.code || '');
     const state = String(req.query.state || '');
 
     if (!code) return res.status(400).send('no code');
 
-    const appUrl = `myapp://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+    const appUrl = `co.lightby.app://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
 
+    const html = `
+    <!doctype html>
+    <html>
+    <head>
+    <meta charset="utf-8" />
+    <title>번개분양</title>
+    <style>
+    body {
+        background: #f8fafc;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .wrap {
+        display: flex;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+    }
+    .box {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 32px 28px;
+        width: 320px;
+        text-align: center;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+    h1 {
+        font-size: 18px;
+        margin-bottom: 12px;
+        color: #111827;
+        font-weight: 600;
+    }
+    p {
+        font-size: 14px;
+        margin-bottom: 20px;
+        color: #374151;
+    }
+    a {
+        display: inline-block;
+        margin-top: 10px;
+        font-size: 14px;
+        color: #2563eb;
+        text-decoration: underline;
+    }
+    .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #d1d5db;
+        border-top-color: #2563eb;
+        border-radius: 50%;
+        margin: 10px auto 18px;
+        animation: spin .8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    </style>
+    </head>
+    <body>
+    <div class="wrap">
+        <div class="box">
+        <div class="spinner"></div>
+        <h1>번개분양 앱으로 이동중입니다</h1>
+        <p>잠시만 기다려 주세요...</p>
+        <a href="${appUrl}">앱이 안 열리면 여기를 눌러주세요</a>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(function(){ location.href='${appUrl}'; }, 100);
+    </script>
+    </body>
+    </html>`;
     // 일부 브라우저 302 커스텀스킴 차단 대비 JS 방식
-    res.set('Content-Type', 'text/html; charset=utf-8').send(`
-<!doctype html><meta charset="utf-8">
-<title>앱으로 이동 중...</title>
-<script>setTimeout(function(){ location.href='${appUrl}'; }, 50);</script>
-앱으로 이동 중입니다... <a href="${appUrl}">안 되면 여길 눌러주세요</a>
-`);
+    res.set(html);
 });
 
 authRouter.post('/access_hook_chk_app', async (req, res, next) => {
