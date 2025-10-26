@@ -12,6 +12,9 @@ import jwt from 'jsonwebtoken';
 const authRouter = express.Router();
 
 authRouter.get('/kakao_app_callback', async (req, res, next) => {
+
+    console.log('카카오 콜백 들어왔나?!?!?!?!?!?!');
+    
     const code = String(req.query.code || '');
     const state = String(req.query.state || '');
 
