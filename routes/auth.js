@@ -95,7 +95,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
 
 
-                return res.json({ accessToken, refreshToken, accessExpiresInSec, user });
+                return res.json({ accessToken, refreshToken, user });
             } catch (error) {
                 console.error(error.message);
             }
