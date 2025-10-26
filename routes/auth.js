@@ -11,6 +11,23 @@ import jwt from 'jsonwebtoken';
 
 const authRouter = express.Router();
 
+authRouter.get('/kakao_app_callback', async (req, res, next) => {
+    const code = String(req.query.code || '');
+    const state = String(req.query.state || '');
+
+    if (!code) return res.status(400).send('no code');
+
+    const appUrl = `myapp://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+
+    // 일부 브라우저 302 커스텀스킴 차단 대비 JS 방식
+    res.set('Content-Type', 'text/html; charset=utf-8').send(`
+<!doctype html><meta charset="utf-8">
+<title>앱으로 이동 중...</title>
+<script>setTimeout(function(){ location.href='${appUrl}'; }, 50);</script>
+앱으로 이동 중입니다... <a href="${appUrl}">안 되면 여길 눌러주세요</a>
+`);
+});
+
 authRouter.post('/access_hook_chk_app', async (req, res, next) => {
 
     let userInfo = {}
