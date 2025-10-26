@@ -71,7 +71,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
         const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [kakaoUserInfo.id]);
 
         if (getUserInfo.length > 0) {
-            
+
             const userInfo = getUserInfo[0];
             const accessPayload = {
                 userId: userInfo.idx,
@@ -86,7 +86,8 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
             const refreshToken = jwt.sign(refreshPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
 
             data.loginStatus = true;
-
+            const now = moment().format('YYYY-MM-DD HH:mm:ss')
+            
             const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
             await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, userInfo.idx]);
 
