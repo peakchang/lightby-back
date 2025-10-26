@@ -13,9 +13,18 @@ const authRouter = express.Router();
 
 
 authRouter.post('/kakao_app_callback', async (req, res) => {
+
+    console.log('앱 콜백 들어왔음!!!!');
+
     try {
         const code = String(req.body.code || '');
-        if (!code) return res.status(400).json({ message: 'no code' });
+        console.log(code);
+
+        if (!code) {
+            console.log('코드가 없다!!');
+
+            return res.status(400).json({ message: 'no code' });
+        }
 
         // 1) code → 카카오 토큰 교환
         const params = new URLSearchParams();
@@ -39,7 +48,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
         const kakaoUserInfo = meResp.data;
         console.log(kakaoUserInfo);
-        
+
 
         // const kakaoId = String(meResp.data.id);
         // const email = meResp.data?.kakao_account?.email ?? null;
