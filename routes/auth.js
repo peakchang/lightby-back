@@ -85,8 +85,8 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
                     userId: userInfo.idx
                 }
 
-                const accessToken = jwt.sign(accessPayload, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-                const refreshToken = jwt.sign(refreshPayload, REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
+                const accessToken = jwt.sign(accessPayload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+                const refreshToken = jwt.sign(refreshPayload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
 
                 data.loginStatus = true;
 
