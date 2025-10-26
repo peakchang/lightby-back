@@ -11,7 +11,36 @@ import axios from 'axios';
 // import cookieParser from "cookie-parser";
 
 const authRouter = express.Router();
+authRouter.post('/kakao_join_app', async (req, res) => {
+    const body = req.body;
+    const userInfo = body.userInfo;
+    const queryStr = getQueryStr(userInfo, 'insert');
+    let userId = "";
+    let accessToken = ""
+    let refreshToken = ""
+    try {
+        const insertSnsUserQuery = `INSERT INTO users (${queryStr.str}) VALUES (${queryStr.question})`;
+        const [result] = await sql_con.promise().query(insertSnsUserQuery, queryStr.values);
 
+        userId = result.insertId
+        const payload = {
+            userId
+        }
+
+        // 토큰 생성!
+        accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+        refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
+
+
+        const now = moment().format('YYYY-MM-DD HH:mm:ss')
+        const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
+        const [insertInfo] = await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, result.insertId]);
+
+    } catch (err) {
+        console.error(err.message);
+    }
+    return json({ userId, accessToken, refreshToken })
+})
 
 authRouter.post('/kakao_app_callback', async (req, res) => {
 
@@ -87,7 +116,7 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
             data.loginStatus = true;
             const now = moment().format('YYYY-MM-DD HH:mm:ss')
-            
+
             const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
             await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, userInfo.idx]);
 
