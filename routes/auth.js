@@ -11,7 +11,52 @@ import jwt from 'jsonwebtoken';
 
 const authRouter = express.Router();
 
-authRouter.get('/kakao_app_callback', async (req, res, next) => {
+
+authRouter.post('/kakao_app_callback', async (req, res) => {
+    try {
+        const code = String(req.body.code || '');
+        if (!code) return res.status(400).json({ message: 'no code' });
+
+        // 1) code → 카카오 토큰 교환
+        const params = new URLSearchParams();
+        params.append('grant_type', 'authorization_code');
+        params.append('client_id', process.env.KAKAO_CLIENT_ID); // REST API 키
+        params.append('redirect_uri', 'https://api.lightby.co.kr/auth/kakao/bridge');
+        params.append('code', code);
+        if (process.env.KAKAO_CLIENT_SECRET) {
+            params.append('client_secret', process.env.KAKAO_CLIENT_SECRET);
+        }
+
+        const tokenResp = await axios.post('https://kauth.kakao.com/oauth/token', params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        const kakaoAccess = tokenResp.data.access_token;
+
+        // 2) 카카오 유저 정보
+        const meResp = await axios.get('https://kapi.kakao.com/v2/user/me', {
+            headers: { Authorization: `Bearer ${kakaoAccess}` }
+        });
+
+        const kakaoUserInfo = meResp.data;
+        console.log(kakaoUserInfo);
+        
+
+        // const kakaoId = String(meResp.data.id);
+        // const email = meResp.data?.kakao_account?.email ?? null;
+
+        // // 3) 우리 서비스 토큰 발급(예시; 실제로는 JWT 발급)
+        // const user = { id: `kakao:${kakaoId}`, email };
+        // const accessToken = 'OUR_ACCESS_TOKEN';
+        // const refreshToken = 'OUR_REFRESH_TOKEN';
+        // const accessExpiresInSec = 15 * 60;
+
+        return res.json({ accessToken, refreshToken, accessExpiresInSec, user });
+    } catch (e) {
+        return res.status(400).json({ message: 'kakao exchange failed' });
+    }
+});
+
+authRouter.get('/kakao_app_bridge', async (req, res, next) => {
 
     console.log('카카오 콜백 들어왔나?!?!?!?!?!?!');
 
