@@ -167,6 +167,9 @@ boardRouter.post('/load_item', async (req, res, next) => {
     let likeCount = 0
     let { postIdx } = req.body
 
+    console.log(postIdx);
+    
+
 
     try {
         // 기본 post 내용 불러오기 (user 정보랑 JOIN 해서 불러오기)

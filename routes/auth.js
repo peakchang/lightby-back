@@ -174,7 +174,7 @@ authRouter.get('/kakao_app_bridge', async (req, res, next) => {
     }
 
 
-    const appUrl = `co.lightby.app://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+    const appUrl = `con.lightby.app://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
 
     const html = `
     <!doctype html>
