@@ -175,6 +175,8 @@ authRouter.get('/kakao_app_bridge', async (req, res, next) => {
 
 
     const appUrl = `con.lightby.app://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+    console.log(appUrl);
+    
 
     const html = `
     <!doctype html>
@@ -247,7 +249,7 @@ authRouter.get('/kakao_app_bridge', async (req, res, next) => {
     </div>
 
     <script>
-        setTimeout(function(){ location.href='${appUrl}'; }, 100);
+        setTimeout(function(){ location.href='${appUrl}'; }, 300);
     </script>
     </body>
     </html>`;
