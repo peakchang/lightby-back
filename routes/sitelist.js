@@ -19,16 +19,25 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
     let statusMessage = ""
     let postList = [];
 
+    console.log(userId);
+    
+    console.log(type);
+    
     try {
         if (type == 'interest') {
             const getUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
             const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [userId]);
+
+            console.log(getUserInfo[0]['interest']);
+            
 
             // 관심 분야 설정 안되어 있으면 return 처리!
             if (!getUserInfo[0]['interest']) {
                 return res.json({ postList, interestStatus, statusMessage: "설정된 관심 지역이 없습니다.\n관심 지역 설정은 마이 페이지에서 설정 가능합니다." })
             }
             const interestInfo = JSON.parse(getUserInfo[0]['interest'])
+            console.log(interestInfo);
+            
             const whereClauses = Object.entries(interestInfo)
                 .map(([field, values]) => {
                     if (!Array.isArray(values) || values.length === 0) return ''; // 배열이 비어있으면 제외
@@ -38,7 +47,12 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
                 .filter(clause => clause !== '') // 빈 문자열 제거
                 .join(' AND ');
 
+                console.log(whereClauses);
+                
             const getInterestListQuery = `SELECT * FROM site WHERE ${whereClauses} ORDER BY idx DESC;`;
+
+            console.log(getInterestListQuery);
+            
             const [getInterestList] = await sql_con.promise().query(getInterestListQuery);
 
             // 검색 결과값 없으면 false 리턴
@@ -72,6 +86,8 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
         }
 
     } catch (error) {
+        console.log('에러?!');
+        
         interestStatus = false
         console.error(error.message);
 

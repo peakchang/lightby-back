@@ -11,6 +11,24 @@ import axios from 'axios';
 // import cookieParser from "cookie-parser";
 
 const authRouter = express.Router();
+
+
+
+authRouter.post('/delete_account', async (req, res) => {
+
+    const {idx} = req.body;
+
+
+    console.log(idx);
+    console.log('회원 탈퇴 완료!!!');
+    
+
+    res.status(200).json({})
+    
+})
+
+
+
 authRouter.post('/kakao_join_app', async (req, res) => {
     const body = req.body;
     const userInfo = body.userInfo;
