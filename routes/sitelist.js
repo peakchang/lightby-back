@@ -18,17 +18,11 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
     let interestStatus = false;
     let statusMessage = ""
     let postList = [];
-
-    console.log(userId);
-    
-    console.log(type);
     
     try {
         if (type == 'interest') {
             const getUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
             const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [userId]);
-
-            console.log(getUserInfo[0]['interest']);
             
 
             // 관심 분야 설정 안되어 있으면 return 처리!
@@ -36,7 +30,6 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
                 return res.json({ postList, interestStatus, statusMessage: "설정된 관심 지역이 없습니다.\n관심 지역 설정은 마이 페이지에서 설정 가능합니다." })
             }
             const interestInfo = JSON.parse(getUserInfo[0]['interest'])
-            console.log(interestInfo);
             
             const whereClauses = Object.entries(interestInfo)
                 .map(([field, values]) => {
@@ -46,12 +39,8 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
                 })
                 .filter(clause => clause !== '') // 빈 문자열 제거
                 .join(' AND ');
-
-                console.log(whereClauses);
                 
             const getInterestListQuery = `SELECT * FROM site WHERE ${whereClauses} ORDER BY idx DESC;`;
-
-            console.log(getInterestListQuery);
             
             const [getInterestList] = await sql_con.promise().query(getInterestListQuery);
 
@@ -86,8 +75,6 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
         }
 
     } catch (error) {
-        console.log('에러?!');
-        
         interestStatus = false
         console.error(error.message);
 
@@ -175,7 +162,6 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
         // const getQuery = (product) => {
         //     if (product === 'free') {
         //         nextStartNum = freeStartNum + 10
-        //         console.log(nextStartNum);
 
         //         return `SELECT ${rows} FROM site 
         //         WHERE (product = ? OR product IS NULL OR product = '') 
@@ -195,7 +181,6 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
         // while (currentIndex < productPriority.length && !loadFound) {
         //     const currentProduct = productPriority[currentIndex];
         //     currentStatus = currentProduct
-        //     console.log(`currentProduct : ${currentProduct}`);
 
         //     const [result] = await sql_con.promise().query(getQuery(currentProduct), [currentProduct]);
 

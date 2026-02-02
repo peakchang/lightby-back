@@ -12,8 +12,6 @@ const apiRouter = express.Router();
 
 
 apiRouter.get('/update_app_count', async (req, res, next) => {
-    console.log('update_fake_count');
-
     const today = moment().format('YYYY-MM-DD')
     try {
         const chkTodayCountQuery = "SELECT * FROM today_count WHERE date = ?"
@@ -32,8 +30,6 @@ apiRouter.get('/update_app_count', async (req, res, next) => {
 
 
 apiRouter.get('/insert_n_update_app_count', async (req, res, next) => {
-
-    console.log('insert_n_update_app_count!!!!!!!!!!!!!!!');
 
     const today = moment().format('YYYY-MM-DD')
     try {
@@ -57,7 +53,6 @@ apiRouter.get('/insert_n_update_app_count', async (req, res, next) => {
 
 
 apiRouter.get('/update_count', async (req, res, next) => {
-    console.log('update_fake_count');
 
     const today = moment().format('YYYY-MM-DD')
     const random = getRandomBetween(5, 8)
@@ -75,29 +70,111 @@ apiRouter.get('/update_count', async (req, res, next) => {
     res.status(200).json({})
 })
 
-apiRouter.get('/insert_n_update_count', async (req, res, next) => {
 
-    console.log('insert_n_update_count!!!!!!!!!!!!!!!');
+apiRouter.post('/record_visit', async (req, res) => {
 
-    const today = moment().format('YYYY-MM-DD')
-    const random = getRandomBetween(5, 8)
+    console.log('방문 로그 진입!');
+
+    // 1. 정보 추출
+    const userAgent = req.headers['user-agent'] || 'unknown'; // 여기서 USER-AGENT를 가져옵니다.
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const { path, referer } = req.body; // 유입경로(referer)는 프론트에서 보내줌
+
+    // 2. 봇 필터링 (생략 가능하지만 권장)
+    const botKeywords = ['bot', 'spider', 'crawler', 'lighthouse'];
+    const isBot = botKeywords.some(keyword => userAgent.toLowerCase().includes(keyword));
+
     try {
-        const chkTodayCountQuery = "SELECT * FROM today_count WHERE date = ?"
-        const [chkTodayCount] = await sql_con.promise().query(chkTodayCountQuery, [today]);
+        // 3. DB 입력 (user_agent 컬럼 포함)
+        const query = `
+            INSERT INTO visit_logs (ip, user_agent, path, referer) 
+            VALUES (?, ?, ?, ?)
+        `;
+        await sql_con.promise().query(query, [ip, userAgent, path, referer || '직접유입']);
 
-        if (chkTodayCount.length == 0) {
-            const insertTodayCountQuery = "INSERT INTO today_count (date, fake_count, real_count) VALUES (?,?,?)";
-            await sql_con.promise().query(insertTodayCountQuery, [today, random, 1]);
-        } else {
-            const updateTodayCountQuery = "UPDATE today_count SET fake_count = ?, real_count = ? WHERE date = ?";
-            await sql_con.promise().query(updateTodayCountQuery, [chkTodayCount[0]['fake_count'] + random, chkTodayCount[0]['real_count'] + 1, today]);
-        }
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        console.error(err);
+        if (!res.headersSent) res.status(500).json({ error: 'DB 에러' });
+    }
+});
+
+apiRouter.get('/visit_stats_all', async (req, res) => {
+
+    console.log('스타트트트!!!');
+
+    const { start, end } = req.query;
+
+    try {
+        // 1. 일자별 요약 통계 (그래프 및 상단 테이블용)
+        const summaryQuery = `
+            SELECT 
+                visit_date as date,
+                COUNT(DISTINCT ip) as total_count,
+                COUNT(DISTINCT CASE WHEN platform = 'WEB' THEN ip END) as web_count,
+                COUNT(DISTINCT CASE WHEN platform = 'APP' THEN ip END) as app_count
+            FROM visit_logs 
+            WHERE visit_date BETWEEN ? AND ?
+            GROUP BY visit_date
+            ORDER BY visit_date DESC
+        `;
+
+        // 2. 상세 로그 (하단 테이블용)
+        const detailQuery = `
+            SELECT created_at as date, ip, referer, user_agent, platform
+            FROM visit_logs
+            WHERE visit_date BETWEEN ? AND ?
+            ORDER BY created_at DESC
+            LIMIT 100
+        `;
+
+        const [summary] = await sql_con.promise().query(summaryQuery, [start, end]);
+        const [details] = await sql_con.promise().query(detailQuery, [start, end]);
+
+        res.status(200).json({ summary, details });
     } catch (err) {
         console.error(err.message);
+
+        res.status(500).json({ error: err.message });
     }
+});
 
-    res.status(200).json({})
 
+
+apiRouter.get('/insert_n_update_count', async (req, res, next) => {
+
+    const today = moment().format('YYYY-MM-DD');
+    const random = getRandomBetween(5, 8);
+
+    try {
+        // 1. 먼저 오늘 데이터가 있는지 확인
+        const [rows] = await sql_con.promise().query(
+            "SELECT idx, fake_count, real_count FROM today_count WHERE date = ?",
+            [today]
+        );
+
+        if (rows.length === 0) {
+            // 2. 데이터가 없으면 새로 삽입
+            await sql_con.promise().query(
+                "INSERT INTO today_count (date, fake_count, real_count) VALUES (?, ?, 1)",
+                [today, random]
+            );
+            return res.status(200).json({ message: 'inserted' }); // 응답 후 종료
+        } else {
+            // 3. 데이터가 있으면 기존 값에 더하기 (계산은 SQL에서 직접 하는 게 가장 정확함)
+            await sql_con.promise().query(
+                "UPDATE today_count SET fake_count = fake_count + ?, real_count = real_count + 1 WHERE date = ?",
+                [random, today]
+            );
+            return res.status(200).json({ message: 'updated' }); // 응답 후 종료
+        }
+    } catch (err) {
+        console.error(err);
+        // 에러 응답 시 헤더 중복 전송 방지
+        if (!res.headersSent) {
+            return res.status(500).json({ error: err.message });
+        }
+    }
 })
 
 
@@ -123,7 +200,6 @@ apiRouter.post('/send_sms', async (req, res, next) => {
         }
 
         const result = await aligoapi.send(req, AuthData)
-        console.log(result);
 
     } catch (err) {
         console.error(err.message);

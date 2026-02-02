@@ -11,7 +11,6 @@ const admEtcRouter = express.Router();
 // info 부분!!
 
 admEtcRouter.post('/load_visit_list', imageUpload.single('onimg'), async (req, res, next) => {
-    console.log('들어와?!?!?');
     let visit_list = [];
     try {
         const loadVisitListQuery = "SELECT * FROM today_count ORDER BY idx DESC";
@@ -29,9 +28,6 @@ admEtcRouter.post('/upload_talent_include_image', imageUpload.single('onimg'), a
     const body = req.body;
 
     const saveUrl = req.file.filename;
-
-    console.log(body);
-    console.log(saveUrl);
 
     const delPath = req.body.prev_img
 
@@ -68,8 +64,6 @@ admEtcRouter.post('/upload_talent_include_image', imageUpload.single('onimg'), a
 admEtcRouter.post('/upload_talent_no_image', async (req, res, next) => {
     const { name, gender, age, career, introduction, idx } = req.body;
 
-    console.log(req.body);
-
 
     try {
         const updateTalentQuery = "UPDATE users SET name = ?, gender = ?, age = ?, career = ?, introduction = ? WHERE idx = ?";
@@ -84,7 +78,6 @@ admEtcRouter.post('/upload_talent_no_image', async (req, res, next) => {
 
 admEtcRouter.post('/get_talent', async (req, res, next) => {
     const { userIdx } = req.body;
-    console.log(userIdx);
     let userInfo = {}
 
     try {

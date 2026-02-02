@@ -8,10 +8,6 @@ const qnaRouter = express.Router();
 
 qnaRouter.post('/upload_qna_answer', async (req, res, next) => {
     const { qnaAnswer, idx } = req.body;
-
-    console.log('여기 진입은 하지?!');
-    console.log(`qnaAnswer : ${qnaAnswer} / idx : ${idx}`);
-    
     
     try {
         const uploadQnaAnswerQuery = "UPDATE qna SET answer = ? WHERE idx = ?";

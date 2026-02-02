@@ -10,9 +10,6 @@ const admManageRouter = express.Router();
 admManageRouter.post('/update_ad_date', async (req, res, next) => {
     const { idx, ad_start_date, ad_end_date } = req.body;
 
-    console.log(idx);
-    console.log(ad_start_date);
-    console.log(ad_end_date);
 
     try {
         const updateAdDateQuery = "UPDATE site SET ad_start_date = ?, ad_end_date = ? WHERE idx = ?";
@@ -140,10 +137,10 @@ admManageRouter.post('/load_joboffer_list', async (req, res, next) => {
         }
     }
 
-    if(product && product != 'all'){
-        if(!searchStr){
+    if (product && product != 'all') {
+        if (!searchStr) {
             searchStr = `WHERE product = '${product}'`
-        }else{
+        } else {
             searchStr = `AND product = '${product}'`
         }
     }
@@ -179,15 +176,12 @@ admManageRouter.post('/load_joboffer_list', async (req, res, next) => {
         `;
         const [loadJobofferList] = await sql_con.promise().query(loadJobofferListQuery);
 
-        console.log(loadJobofferList.length);
 
 
         if (loadJobofferList.length > 0) {
             jobOfferList = loadJobofferList
         }
 
-        console.log(jobOfferList);
-        
 
 
     } catch (err) {

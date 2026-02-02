@@ -183,10 +183,30 @@ CREATE TABLE today_count(
 );
 
 
+ALTER TABLE today_count ADD UNIQUE (date);
+
 ALTER TABLE today_count DROP COLUMN app_all_count;
 
 
 ALTER TABLE today_count ADD COLUMN app_count INT DEFAULT 0 AFTER real_count;
 ALTER TABLE today_count ADD COLUMN app_all_count INT DEFAULT 0 AFTER app_count;
+
+
+
+
+CREATE TABLE visit_logs (
+    idx INT AUTO_INCREMENT PRIMARY KEY,
+    ip VARCHAR(50),           -- 방문자 IP
+    user_agent TEXT,          -- 브라우저/기기 정보 (봇 판별용)
+    path VARCHAR(255),        -- 방문한 페이지 경로
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 방문 시간
+    visit_date DATE AS (DATE(created_at)) STORED,  -- 통계용 날짜 컬럼 (자동 생성)
+    INDEX (visit_date),       -- 날짜 검색 최적화
+    INDEX (ip)                -- IP 검색 최적화
+);
+
+ALTER TABLE visit_logs ADD COLUMN referer VARCHAR(255) AFTER path;
+
+ALTER TABLE visit_logs ADD COLUMN platform ENUM('WEB', 'APP', 'BOT') DEFAULT 'WEB';
 
 */

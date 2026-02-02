@@ -134,8 +134,6 @@ boardRouter.post('/upload_reply', async (req, res, next) => {
 boardRouter.post('/update_reply', async (req, res, next) => {
     const { bo_id, replyContent } = req.body
     
-    console.log('댓글 업데이투ㄹ우으으으으으!!!!!');
-    
     try {
         const replyUpdateQuery = "UPDATE reply SET content = ? WHERE idx = ?";
         await sql_con.promise().query(replyUpdateQuery, [replyContent, bo_id]);
@@ -147,8 +145,7 @@ boardRouter.post('/update_reply', async (req, res, next) => {
 
 boardRouter.post('/delete_reply', async (req, res, next) => {
     const { bo_id } = req.body
-    
-    console.log('댓글 삭제욤~~~~~~~~~~~~~~~');
+
     
     try {
         const deleteReplyQuery = "DELETE FROM reply WHERE idx = ?";
@@ -166,8 +163,6 @@ boardRouter.post('/load_item', async (req, res, next) => {
     let replyList = [];
     let likeCount = 0
     let { postIdx } = req.body
-
-    console.log(postIdx);
     
 
 

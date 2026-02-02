@@ -7,11 +7,8 @@ const usersRouter = express.Router();
 
 
 usersRouter.post('/set_interesting', async (req, res, next) => {
-    console.log('안들어왕?!?!?');
 
     const { user_id, insertestStr } = req.body
-    console.log(user_id);
-    console.log(insertestStr);
 
     try {
         const updateInterestQuery = "UPDATE users SET interest = ? WHERE idx = ?";

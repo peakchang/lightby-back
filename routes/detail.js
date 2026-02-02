@@ -8,23 +8,19 @@ const detailRouter = express.Router();
 
 detailRouter.post('/', async (req, res, next) => {
 
-    console.log('일단 들어옴?!?!?!');
+
     
 
     const { idx, userId } = req.body;
     let detail = {}
     let favorateBool = false;
 
-    console.log(idx);
-    console.log(userId);
-    
-    
 
     try {
         const getDetailQuery = "SELECT * FROM site WHERE idx = ?";
         const [getDetail] = await sql_con.promise().query(getDetailQuery, [idx]);
         detail = getDetail[0]
-        console.log(detail);
+
         
 
         const favBoolChkQuery = "SELECT * FROM post_likes WHERE user_id = ? AND post_id = ? AND is_liked = TRUE";

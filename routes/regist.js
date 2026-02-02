@@ -61,9 +61,6 @@ registRouter.post('/update', async (req, res, next) => {
 
     const { allData } = req.body;
 
-    console.log(allData);
-
-
     const itemIdx = allData.idx;
     ['idx', 'sum', 'product', 'created_at', 'updated_at', 'ad_start_date', 'ad_end_date'].forEach(key => delete allData[key]);
 
@@ -170,22 +167,11 @@ registRouter.post('/upload', async (req, res, next) => {
     const freebies = req.body.freebies;
     const THUMB_SIZE = { w: 144, h: 112 };
 
-    console.log(allData);
-
     const orderId = allData.order_id;
     const paymentKey = allData.payment_key;
     const amount = allData.sum;
 
-    console.log(`paymentKey : ${paymentKey}`);
-    console.log(`orderId : ${orderId}`);
-    console.log(`amount : ${amount}`);
-    console.log(`freebies : ${freebies}`);
-    
-
     delete allData.order_id;
-
-
-
 
     try {
         // 썸네일 만들어서 저장!
@@ -249,7 +235,6 @@ registRouter.post('/upload', async (req, res, next) => {
             );
 
             // 결제 성공 비즈니스 로직
-            console.log(response.data);
 
             try {
                 const queryStr = getQueryStr(allData, 'insert', 'created_at')
@@ -274,11 +259,8 @@ registRouter.post('/upload', async (req, res, next) => {
             const queryStr = getQueryStr(allData, 'insert', 'created_at')
             const siteInsertQuery = `INSERT INTO site (${queryStr.str}) VALUES (${queryStr.question})`;
             await sql_con.promise().query(siteInsertQuery, queryStr.values);
-
-            console.log(allData.product);
             
             if(allData.product != 'free' && freebies){
-                console.log('프리비즈 차감 들어옴!!!');
                 const updateUserFreebiesQuery = "UPDATE users SET freebies = FALSE WHERE idx = ?";
                 await sql_con.promise().query(updateUserFreebiesQuery, [allData.user_id]);
             }

@@ -29,8 +29,6 @@ const imageUpload = multer({
         fileSize: 5 * 1024 * 1024, // 5MB 제한
     },
     fileFilter: (req, file, cb) => {
-        console.log(file);
-        
         const filetypes = /jpeg|jpg|png|gif|webp/;
         const mimetype = filetypes.test(file.mimetype);
         const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -52,10 +50,6 @@ imgRouter.post('/upload_single', imageUpload.single('onimg'), async (req, res, n
     const body = req.body;
     const folder = req.body.folder;
     const now = moment().format('YYMMDD')
-
-    console.log(req.file);
-    
-    console.log(body);
 
 
     try {

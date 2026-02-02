@@ -15,16 +15,8 @@ const authRouter = express.Router();
 
 
 authRouter.post('/delete_account', async (req, res) => {
-
     const {idx} = req.body;
-
-
-    console.log(idx);
-    console.log('회원 탈퇴 완료!!!');
-    
-
     res.status(200).json({})
-    
 })
 
 
@@ -48,9 +40,6 @@ authRouter.post('/kakao_join_app', async (req, res) => {
         // 토큰 생성!
         accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
         refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '14d' });
-
-        console.log(accessToken);
-        console.log(refreshToken);
         
         
 
@@ -58,8 +47,6 @@ authRouter.post('/kakao_join_app', async (req, res) => {
         const now = moment().format('YYYY-MM-DD HH:mm:ss')
         const tokenUpdateQuery = `UPDATE users SET refresh_token = ?, connected_at = ? WHERE idx = ?`;
         const [insertInfo] = await sql_con.promise().query(tokenUpdateQuery, [refreshToken, now, result.insertId]);
-
-        console.log(insertInfo);
         
     } catch (err) {
         console.error(err.message);
@@ -78,19 +65,11 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
     try {
         const code = String(req.body.code || '');
-        console.log(code);
+
 
         if (!code) {
-            console.log('코드가 없다!!');
             return res.status(400).json({ message: 'no code' });
         }
-
-        console.log("1) code → 카카오 토큰 교환");
-
-        console.log(`KAKAO_RESTAPI - ${process.env.KAKAO_RESTAPI}`);
-        console.log(`KAKAO_APP_REDIRECT - ${process.env.KAKAO_APP_REDIRECT}`);
-
-
 
         // 1) code → 카카오 토큰 교환
         const params = new URLSearchParams();
@@ -102,8 +81,6 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
             params.append('client_secret', process.env.KAKAO_RESTAPI);
         }
 
-        console.log("1.5)카카오 액세스 토큰 가져오기!");
-
         const tokenResp = await axios.post('https://kauth.kakao.com/oauth/token', params, {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
@@ -112,14 +89,12 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
         const kakaoAccess = tokenResp.data.access_token;
 
         // 2) 카카오 유저 정보 얻기
-        console.log("2) 카카오 유저 정보 얻기");
 
         const meResp = await axios.get('https://kapi.kakao.com/v2/user/me', {
             headers: { Authorization: `Bearer ${kakaoAccess}` }
         });
 
         const kakaoUserInfo = meResp.data;
-        console.log(kakaoUserInfo);
 
 
         // 해당 유저 정보로 DB에 있는지 (기존 가입 유저인지) 체크
@@ -181,19 +156,15 @@ authRouter.post('/kakao_app_callback', async (req, res) => {
 
 authRouter.get('/kakao_app_bridge', async (req, res, next) => {
 
-    console.log('카카오 콜백 들어왔나?!?!?!?!?!?!');
-
     const code = String(req.query.code || '');
     const state = String(req.query.state || '');
 
     if (!code) {
-        console.log('코드가 없어?!?!?!');
         return res.status(400).send('no code');
     }
 
 
     const appUrl = `con.lightby.app://oauth/kakao?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
-    console.log(appUrl);
     
 
     const html = `
