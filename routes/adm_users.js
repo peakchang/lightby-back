@@ -12,19 +12,24 @@ admUsersRouter.post('/get_counter', async (req, res, next) => {
 
     console.log(start);
     console.log(end);
-    
-    
+
+
 
     // WHERE date BETWEEN '2025-09-01' AND '2025-09-19'
 
 
     let countList = [];
     try {
-        const getCountListQuery = `SELECT * FROM today_count WHERE date BETWEEN '${start}' AND '${end}' ORDER BY idx DESC`
+        const getCountListQuery = `SELECT * FROM today_count WHERE date >= '${start} 00:00:00' AND date <= '${end} 23:59:59' ORDER BY idx DESC`;
+
+        console.log(getCountListQuery);
+
         const [getCountList] = await sql_con.promise().query(getCountListQuery);
         countList = getCountList
     } catch (error) {
-
+        console.log(error);
+        
+        console.error(error.message);
     }
     res.json({ countList })
 })
