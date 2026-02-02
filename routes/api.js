@@ -78,6 +78,8 @@ apiRouter.post('/record_visit', async (req, res) => {
     // 1. 정보 추출
     const userAgent = req.headers['user-agent'] || 'unknown'; // 여기서 USER-AGENT를 가져옵니다.
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    console.log(ip);
+    
     const { path, referer } = req.body; // 유입경로(referer)는 프론트에서 보내줌
 
     // 2. 봇 필터링 (생략 가능하지만 권장)
