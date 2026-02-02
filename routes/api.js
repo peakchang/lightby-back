@@ -75,24 +75,25 @@ apiRouter.post('/record_visit', async (req, res) => {
 
     console.log('방문 로그 진입!');
 
-    // 1. 정보 추출
-    const userAgent = req.headers['user-agent'] || 'unknown'; // 여기서 USER-AGENT를 가져옵니다.
+    // 1. 전달받은 헤더에서 정보를 먼저 찾고, 없으면 요청자 정보 사용
+    const userAgent = req.headers['user-agent'] || 'unknown';
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     console.log(ip);
-    
+
     const { path, referer } = req.body; // 유입경로(referer)는 프론트에서 보내줌
 
     // 2. 봇 필터링 (생략 가능하지만 권장)
     const botKeywords = ['bot', 'spider', 'crawler', 'lighthouse'];
     const isBot = botKeywords.some(keyword => userAgent.toLowerCase().includes(keyword));
 
+    if (isBot) {
+        return res.status(200).json({ skip: true, reason: 'bot or node' });
+    }
+
     try {
         // 3. DB 입력 (user_agent 컬럼 포함)
-        const query = `
-            INSERT INTO visit_logs (ip, user_agent, path, referer) 
-            VALUES (?, ?, ?, ?)
-        `;
-        await sql_con.promise().query(query, [ip, userAgent, path, referer || '직접유입']);
+        const query = "INSERT INTO visit_logs (ip, user_agent, path, referer) VALUES (?, ?, ?, ?)";
+        await sql_con.promise().query(query, [ip, userAgent, path, referer]);
 
         return res.status(200).json({ success: true });
     } catch (err) {
