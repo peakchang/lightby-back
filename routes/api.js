@@ -76,8 +76,8 @@ apiRouter.post('/record_visit', async (req, res) => {
     console.log('방문 로그 진입!');
 
     // 1. 전달받은 헤더에서 정보를 먼저 찾고, 없으면 요청자 정보 사용
-    const userAgent = req.headers['user-agent'] || 'unknown';
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const userAgent = req.body.clientUA || req.headers['user-agent'] || 'unknown';
+    const ip = req.body.clientIp || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     console.log(ip);
 
     const { path, referer } = req.body; // 유입경로(referer)는 프론트에서 보내줌
