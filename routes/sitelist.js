@@ -18,19 +18,19 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
     let interestStatus = false;
     let statusMessage = ""
     let postList = [];
-    
+
     try {
         if (type == 'interest') {
             const getUserInfoQuery = "SELECT * FROM users WHERE idx = ?";
             const [getUserInfo] = await sql_con.promise().query(getUserInfoQuery, [userId]);
-            
+
 
             // 관심 분야 설정 안되어 있으면 return 처리!
             if (!getUserInfo[0]['interest']) {
                 return res.json({ postList, interestStatus, statusMessage: "설정된 관심 지역이 없습니다.\n관심 지역 설정은 마이 페이지에서 설정 가능합니다." })
             }
             const interestInfo = JSON.parse(getUserInfo[0]['interest'])
-            
+
             const whereClauses = Object.entries(interestInfo)
                 .map(([field, values]) => {
                     if (!Array.isArray(values) || values.length === 0) return ''; // 배열이 비어있으면 제외
@@ -39,9 +39,9 @@ sitelistRouter.post('/get_interest_list', async (req, res, next) => {
                 })
                 .filter(clause => clause !== '') // 빈 문자열 제거
                 .join(' AND ');
-                
+
             const getInterestListQuery = `SELECT * FROM site WHERE ${whereClauses} ORDER BY idx DESC;`;
-            
+
             const [getInterestList] = await sql_con.promise().query(getInterestListQuery);
 
             // 검색 결과값 없으면 false 리턴
@@ -93,13 +93,16 @@ function buildLikeClause(field, keywords) {
 // 메인 페이지 사이트 리스트!!!
 sitelistRouter.post('/load_site_list', async (req, res, next) => {
 
-    const { mainLocation, searchVal, } = req.body
+    const { mainLocation, searchVal, sortVal } = req.body
 
 
     // let loadSiteList = [];
     // let currentStatus = ""
     // let setNextStatus = ""
     // let nextStartNum = 0
+
+    console.log(sortVal);
+
 
 
 
@@ -123,10 +126,22 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
         searchQueryStr = ` AND subject LIKE '%${searchVal}%'`
     }
 
+    let sortQueryStr = ""
+    if (sortVal) {
+        if (sortVal == "high_fee") {
+            sortQueryStr = "ORDER BY fee DESC, idx DESC";
+        } else if (sortVal == "latest" || sortVal == "base") {
+            sortQueryStr = "ORDER BY idx DESC";
+        } else if (sortVal == "popular") {
+            sortQueryStr = "ORDER BY view_count DESC, idx DESC";
+        }
+    }
+
     let adFilterQueryStr = ` AND created_at >= DATE_SUB(DATE(NOW()), INTERVAL 10 DAY)`
     // if (siteLoadStatus != 'free') {
     //     addFilterQueryStr = ` AND created_at >= DATE_SUB(DATE(NOW()), INTERVAL 10 DAY)`
     // }
+
 
 
     let premiumList = [];
@@ -136,19 +151,19 @@ sitelistRouter.post('/load_site_list', async (req, res, next) => {
     const rows = "idx,location,thumbnail,imgs,subject,point,fee_type,fee,business,occupation,icons"
     try {
 
-        const getPremiumListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${adFilterQueryStr} ORDER BY idx DESC`
+        const getPremiumListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${adFilterQueryStr} ${sortQueryStr}`
         const [getPremiumList] = await sql_con.promise().query(getPremiumListQuery, ['premium']);
 
         premiumList = getPremiumList
 
 
-        const getTopListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${adFilterQueryStr} ORDER BY idx DESC`
+        const getTopListQuery = `SELECT ${rows} FROM site WHERE product = ? ${locationQueryStr}${searchQueryStr}${adFilterQueryStr} ${sortQueryStr}`
         const [getTopList] = await sql_con.promise().query(getTopListQuery, ['top']);
 
         topList = getTopList
 
 
-        const getFreeListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ORDER BY idx DESC`
+        const getFreeListQuery = `SELECT ${rows} FROM site WHERE (product = ? OR product IS NULL OR product = '') ${locationQueryStr} ${searchQueryStr} ${sortQueryStr}`
         const [getFreeList] = await sql_con.promise().query(getFreeListQuery, ['free']);
 
         freeList = getFreeList

@@ -103,13 +103,13 @@ apiRouter.post('/record_visit', async (req, res) => {
 });
 
 apiRouter.get('/visit_stats_all', async (req, res) => {
-
-    console.log('스타트트트!!!');
-
     const { start, end } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 15;
+    const offset = (page - 1) * limit;
 
     try {
-        // 1. 일자별 요약 통계 (그래프 및 상단 테이블용)
+        // 1. 일자별 요약 통계 (그래프 및 상단 테이블용 - 페이징 영향 X)
         const summaryQuery = `
             SELECT 
                 visit_date as date,
@@ -122,22 +122,42 @@ apiRouter.get('/visit_stats_all', async (req, res) => {
             ORDER BY visit_date DESC
         `;
 
-        // 2. 상세 로그 (하단 테이블용)
-        const detailQuery = `
-            SELECT created_at as date, ip, referer, user_agent, platform
-            FROM visit_logs
-            WHERE visit_date BETWEEN ? AND ?
-            ORDER BY created_at DESC
-            LIMIT 100
+        // 2. 전체 로그 개수 파악 (하단 페이징 버튼 계산용)
+        const countQuery = `
+            SELECT COUNT(*) as total FROM (
+                SELECT 1 FROM visit_logs 
+                WHERE visit_date BETWEEN ? AND ? 
+                GROUP BY visit_date, ip
+            ) AS sub;
         `;
 
+        // 3. 상세 로그 (하단 테이블용 - 페이징 적용)
+        const detailQuery = `
+            SELECT 
+                MAX(created_at) as date, ip, 
+                MAX(referer) as referer, 
+                MAX(user_agent) as user_agent, 
+                MAX(platform) as platform
+            FROM visit_logs
+            WHERE visit_date BETWEEN ? AND ?
+            GROUP BY visit_date, ip
+            ORDER BY date DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        // 모든 쿼리 실행
         const [summary] = await sql_con.promise().query(summaryQuery, [start, end]);
-        const [details] = await sql_con.promise().query(detailQuery, [start, end]);
+        const [[{ total }]] = await sql_con.promise().query(countQuery, [start, end]);
+        const [details] = await sql_con.promise().query(detailQuery, [start, end, limit, offset]);
 
-        res.status(200).json({ summary, details });
+        res.status(200).json({
+            summary,
+            details,
+            totalPage: Math.ceil(total / limit),
+            currentPage: page
+        });
     } catch (err) {
-        console.error(err.message);
-
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });
